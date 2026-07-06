@@ -1,0 +1,2909 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+<title>GEAR FORGE ── 機械設計 朝15分道場</title>
+<meta name="theme-color" content="#070a10">
+<link rel="manifest" href="manifest.json">
+<link rel="icon" href="icon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="icon.svg">
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+  html, body { height: 100%; }
+  body {
+    background:
+      radial-gradient(ellipse 70% 40% at 20% 0%, rgba(127,184,255,0.07), transparent),
+      radial-gradient(ellipse 60% 40% at 85% 100%, rgba(160,123,255,0.06), transparent),
+      #05080d;
+    color: #dfe9f5;
+    font-family: "Yu Gothic UI", "Hiragino Sans", "Meiryo", system-ui, sans-serif;
+    overscroll-behavior-y: contain;
+  }
+  #bgfx { position: fixed; inset: 0; z-index: 0; width: 100%; height: 100%; pointer-events: none; }
+  #app { position: relative; z-index: 1; max-width: 470px; margin: 0 auto; padding: 18px 16px 40px; min-height: 100%; }
+
+  /* ===== 打刻スプラッシュ ===== */
+  #splash {
+    position: fixed; inset: 0; z-index: 90; background: #04060a;
+    display: flex; align-items: center; justify-content: center; flex-direction: column; gap: 16px;
+    transition: opacity 0.45s;
+  }
+  #splash.off { opacity: 0; pointer-events: none; }
+  .sgears { display: flex; align-items: center; justify-content: center; height: 70px; }
+  .sgear { font-size: 58px; filter: drop-shadow(0 0 14px rgba(127,184,255,0.65)); line-height: 1; }
+  .sgear.a { animation: gA 0.62s cubic-bezier(0.2, 1.4, 0.4, 1) both; }
+  .sgear.b { font-size: 42px; margin-left: -10px; animation: gB 0.62s cubic-bezier(0.2, 1.4, 0.4, 1) both; }
+  @keyframes gA { 0% { transform: translateX(-60px) rotate(-140deg); opacity: 0; } 100% { transform: translateX(0) rotate(0deg); opacity: 1; } }
+  @keyframes gB { 0% { transform: translateX(60px) rotate(140deg); opacity: 0; } 100% { transform: translateX(0) rotate(18deg); opacity: 1; } }
+  .stitle {
+    font-size: 34px; font-weight: 900; letter-spacing: 6px; color: #eef5ff;
+    text-shadow: 0 0 22px rgba(127,184,255,0.9), 0 0 46px rgba(127,184,255,0.35);
+    position: relative; overflow: hidden;
+    animation: sstamp 0.4s 0.5s cubic-bezier(0.15, 2, 0.3, 1) both;
+  }
+  @keyframes sstamp { 0% { transform: scale(2.4); opacity: 0; } 100% { transform: scale(1); opacity: 1; } }
+  .stitle::after {
+    content: ""; position: absolute; top: 0; bottom: 0; left: -50%; width: 40%;
+    background: linear-gradient(105deg, transparent, rgba(255,255,255,0.55), transparent);
+    animation: sshine 0.55s 0.82s both;
+  }
+  @keyframes sshine { 0% { left: -50%; } 100% { left: 120%; } }
+  .ssub { font-size: 11.5px; color: #7f9cc0; letter-spacing: 2px; animation: sstamp 0.35s 0.78s both; }
+  .sskip { margin-top: 6px; font-size: 10.5px; color: #3d5169; animation: sstamp 0.3s 0.9s both; }
+
+  .goalbanner {
+    margin-top: 14px; padding: 10px 13px; border-radius: 12px; text-align: center;
+    border: 1px solid rgba(127,184,255,0.5); background: rgba(127,184,255,0.06);
+    font-size: 12.5px; font-weight: 800; color: #bcdcff;
+  }
+
+  /* ===== 育つ歯車機構（ホームヒーロー） ===== */
+  .gearhero {
+    margin-top: 12px; border-radius: 14px; overflow: hidden;
+    border: 1px solid #1d2c42; background: linear-gradient(165deg, #0c1420, #0a0f18);
+  }
+  .gearhero .gstage { position: relative; height: 170px; touch-action: none; cursor: grab; }
+  .gearhero .gstage canvas { display: block; }
+  .gearhero .gfallback { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; color: #5d7690; font-size: 12px; text-align: center; padding: 0 20px; }
+  .gearhero .gline { padding: 9px 14px 11px; font-size: 12.5px; color: #9fb4cb; text-align: center; }
+  .gearhero .gline b { color: #bcdcff; font-size: 13.5px; }
+  .gearhero .gbar { margin: 7px 3px 0; height: 8px; border-radius: 5px; background: #101825; overflow: hidden; }
+  .gearhero .gbar div { height: 100%; width: 0%; background: linear-gradient(90deg, #7fb8ff, #a07bff); transition: width 0.8s; }
+
+  /* ===== 復習キューカード ===== */
+  .rqcard {
+    display: flex; align-items: center; justify-content: space-between; gap: 8px;
+    margin-top: 12px; padding: 12px 14px; border-radius: 13px;
+    border: 1.5px solid rgba(255,214,79,0.7); background: rgba(255,214,79,0.08);
+    cursor: pointer; font: inherit;
+  }
+  .rqcard .rqt { font-size: 14px; font-weight: 900; color: #ffe9a3; }
+  .rqcard .rqs { font-size: 10.5px; color: #c9b26a; margin-top: 2px; }
+  .rqcard .rqarrow { font-size: 18px; color: #ffe9a3; }
+
+  #stageWrap { display: none; }
+  #stageWrap.mini .stage3d { height: 30vh; max-height: 230px; min-height: 180px; }
+
+  .teaser {
+    margin-top: 16px; padding: 13px 15px; border-radius: 13px; text-align: left;
+    border: 1px solid rgba(127,184,255,0.45); background: rgba(127,184,255,0.06);
+    font-size: 14px; color: #d8e8fb; line-height: 1.75;
+  }
+  .teaser b { color: #7fb8ff; }
+
+  .cta {
+    display: block; width: 100%; margin-top: 14px; padding: 14px; border: none; border-radius: 13px;
+    font: inherit; font-weight: 900; font-size: 16px; color: #06111f; cursor: pointer;
+    background: linear-gradient(135deg, #7fb8ff, #a8d4ff);
+    box-shadow: 0 0 18px rgba(127,184,255,0.3);
+  }
+  .cta.alt {
+    color: #efe8ff; border: 1.5px solid rgba(160,123,255,0.65);
+    background: linear-gradient(135deg, rgba(160,123,255,0.28), rgba(127,184,255,0.16));
+    box-shadow: 0 0 14px rgba(160,123,255,0.25);
+  }
+  .cta:disabled { opacity: 0.35; box-shadow: none; }
+  .opt {
+    display: block; width: 100%; margin-top: 10px; padding: 15px 16px; border-radius: 13px;
+    border: 1.5px solid #2a3c56; background: #0b1220; color: #dfeaf6;
+    font: inherit; font-size: 16px; font-weight: 700; text-align: left; cursor: pointer;
+  }
+  .opt.correct { border-color: #3ef0a0; color: #d9ffee; background: rgba(62,240,160,0.10); box-shadow: 0 0 14px rgba(62,240,160,0.25); }
+  .opt.wrong { border-color: #ff5d4d; color: #ffd9d0; background: rgba(255,93,77,0.08); }
+  .opt.dim { opacity: 0.45; }
+
+  .home-logo {
+    text-align: center; font-size: 30px; font-weight: 900; letter-spacing: 5px; color: #eef5ff;
+    margin-top: 12px; text-shadow: 0 0 16px rgba(127,184,255,0.8), 0 0 44px rgba(127,184,255,0.3);
+  }
+  .home-sub { text-align: center; font-size: 13px; color: #9fb4cb; margin: 6px 0 18px; }
+  .resume {
+    display: block; width: 100%; padding: 15px; border: 1px solid rgba(127,184,255,0.6); border-radius: 14px;
+    background: linear-gradient(135deg, rgba(127,184,255,0.20), rgba(160,123,255,0.14));
+    color: #eef5ff; font: inherit; font-weight: 900; font-size: 16px; cursor: pointer;
+    box-shadow: 0 0 20px rgba(127,184,255,0.22); text-align: center;
+  }
+  .resume small { display: block; font-weight: 600; font-size: 11.5px; color: #bcdcff; margin-top: 3px; }
+  .prog-row { display: flex; align-items: center; gap: 10px; margin: 16px 0 6px; font-size: 12px; color: #8fa6bd; }
+  .prog-bar { flex: 1; height: 9px; border-radius: 5px; background: #101825; overflow: hidden; }
+  .prog-fill { height: 100%; width: 0%; background: linear-gradient(90deg, #7fb8ff, #a07bff); border-radius: 5px; transition: width 0.6s; }
+  .chap-title { font-size: 13.5px; font-weight: 800; color: #bcd2e8; margin: 16px 0 10px; }
+  .chap-title span { color: #5d7690; font-weight: 600; font-size: 11px; }
+  .nodes { display: flex; flex-wrap: wrap; gap: 12px 14px; }
+  .node { width: 56px; text-align: center; cursor: pointer; border: none; background: none; font: inherit; padding: 0; }
+  .node .dot {
+    width: 44px; height: 44px; margin: 0 auto; border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 15px; font-weight: 800; border: 2px solid #24344a; color: #4d637d; background: #0b1220;
+  }
+  .node .lbl { font-size: 10px; color: #5d7690; margin-top: 4px; }
+  .node.done .dot { border-color: #7fb8ff; color: #06111f; background: #7fb8ff; box-shadow: 0 0 12px rgba(127,184,255,0.5); }
+  .node.done .lbl { color: #bcdcff; }
+  .node.now .dot { border-color: #a07bff; color: #d9c8ff; background: rgba(160,123,255,0.15); animation: pulse 1.6s infinite; }
+  .node.now .lbl { color: #c9b4ff; font-weight: 800; }
+  @keyframes pulse { 0%,100% { box-shadow: 0 0 0 0 rgba(160,123,255,0.55); } 55% { box-shadow: 0 0 0 10px rgba(160,123,255,0); } }
+  .node.lock { opacity: 0.35; cursor: default; }
+  .chap2 {
+    margin-top: 18px; padding: 13px 14px; border-radius: 13px;
+    border: 1px dashed #24344a; color: #7b90a6; font-size: 13px; line-height: 1.7;
+  }
+  .btnrow2 { display: flex; gap: 9px; margin-top: 14px; }
+  .btnrow2 .bb {
+    flex: 1; text-align: center; padding: 13px 6px; border-radius: 13px; font-size: 13.5px; font-weight: 900;
+    border: 1.5px solid rgba(160,123,255,0.6); color: #d9c8ff; background: rgba(160,123,255,0.08); cursor: pointer; font-family: inherit;
+  }
+  .btnrow2 .bb.drill { border-color: rgba(255,140,90,0.6); color: #ffc0a0; background: rgba(255,140,90,0.08); }
+  .streak { margin-top: 16px; text-align: center; font-size: 12.5px; color: #7fb8ff; }
+  .installhint { margin-top: 20px; text-align: center; font-size: 10.5px; color: #3d5169; }
+  .verline { margin-top: 6px; text-align: center; font-size: 10px; color: #2c3d52; }
+
+  .lesson-top { display: flex; align-items: center; gap: 9px; margin-bottom: 14px; font-size: 15px; font-weight: 800; color: #eaf6ff; }
+  .backbtn {
+    border: 1.5px solid #24344a; background: #0b1220; color: #bcdcff; font: inherit; font-size: 16px;
+    width: 38px; height: 38px; border-radius: 11px; cursor: pointer; flex: none;
+  }
+  .tag {
+    background: rgba(127,184,255,0.14); border: 1px solid rgba(127,184,255,0.5);
+    color: #bcdcff; padding: 3px 9px; border-radius: 7px; font-size: 12px; white-space: nowrap;
+  }
+
+  .mission-card {
+    border: 1.5px solid rgba(127,184,255,0.7); border-radius: 16px; padding: 18px 16px;
+    background: linear-gradient(160deg, rgba(127,184,255,0.10), rgba(7,10,16,0.2));
+    box-shadow: 0 0 22px rgba(127,184,255,0.15);
+  }
+  .mno { font-size: 12px; color: #7fb8ff; font-weight: 800; letter-spacing: 2px; }
+  .mq { font-size: 20px; font-weight: 900; color: #f2f8ff; line-height: 1.65; margin-top: 9px; }
+  .mhint { margin-top: 12px; font-size: 13.5px; color: #7f96b0; }
+
+  .stage3d {
+    position: relative; border-radius: 15px; overflow: hidden;
+    border: 1px solid #182436; background: #14171d; height: 46vh; max-height: 340px; min-height: 250px;
+  }
+  .stage3d canvas { display: block; touch-action: none; cursor: grab; }
+  .stage3d::after {
+    content: ""; position: absolute; inset: 0; pointer-events: none;
+    background: radial-gradient(ellipse 75% 70% at 50% 45%, transparent 55%, rgba(0,0,0,0.38) 100%);
+  }
+  .chip {
+    position: absolute; z-index: 4; pointer-events: none;
+    padding: 4px 10px; border-radius: 7px; font-size: 11.5px; font-weight: 800;
+    color: #eef4fa; background: rgba(10,12,16,0.82); border: 1.5px solid rgba(210,225,240,0.75);
+    box-shadow: 0 2px 10px rgba(0,0,0,0.5);
+  }
+  .chip.red { color: #ffd9d0; border-color: rgba(255,93,77,0.9); background: rgba(80,16,8,0.85); }
+  .chip.mapview { top: 9px; left: 9px; }
+  .hint3d {
+    position: absolute; top: 9px; right: 9px; z-index: 4; font-size: 10.5px; color: #cfe0f0;
+    background: rgba(10,12,16,0.72); padding: 4px 10px; border-radius: 999px;
+    border: 1px solid rgba(200,220,240,0.25); pointer-events: none;
+  }
+  .guessline { font-size: 13px; color: #9fc6ff; margin-bottom: 8px; font-weight: 700; }
+  .boom {
+    position: absolute; inset: 0; z-index: 5; display: none; align-items: center; justify-content: center;
+    flex-direction: column; gap: 6px; background: rgba(120,20,10,0.18); pointer-events: none;
+  }
+  .boom.show { display: flex; }
+  .boom .b1 { font-size: 30px; font-weight: 900; color: #ffe2da; text-shadow: 0 0 22px rgba(255,60,40,0.95); transform: rotate(-8deg); }
+  .boom .b2 { font-size: 13px; font-weight: 800; color: #cfe0f0; text-shadow: 0 1px 6px #000; }
+  .flash { position: absolute; inset: 0; z-index: 6; background: #fff; opacity: 0; pointer-events: none; }
+  .legend { display: flex; flex-wrap: wrap; justify-content: center; gap: 5px 12px; margin-top: 10px; font-size: 12.5px; color: #bccddf; }
+  .sliderrow { display: flex; align-items: center; gap: 10px; margin-top: 12px; font-size: 14.5px; color: #d0e0f0; }
+  .sliderrow input[type=range] { flex: 1; accent-color: #7fb8ff; min-width: 0; height: 32px; }
+  .sliderrow .val { min-width: 66px; text-align: right; font-weight: 800; color: #bcdcff; font-size: 16px; }
+  .extra { margin-top: 10px; }
+  .readout { margin-top: 9px; text-align: center; font-size: 14px; color: #9fc6ff; font-weight: 700; }
+  .trynote { margin-top: 10px; text-align: center; font-size: 13px; color: #93a8bd; line-height: 1.65; }
+
+  /* 📐図面の目：方眼オーバーレイ＋ビュー名チップ */
+  .blueov {
+    position: absolute; inset: 0; z-index: 3; pointer-events: none; opacity: 0;
+    transition: opacity 0.3s;
+    background-image:
+      linear-gradient(rgba(127,184,255,0.16) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(127,184,255,0.16) 1px, transparent 1px);
+    background-size: 22px 22px;
+  }
+  .blueov.on { opacity: 1; }
+  .viewchip {
+    position: absolute; left: 50%; top: 9px; transform: translateX(-50%); z-index: 4;
+    padding: 5px 14px; border-radius: 999px; font-size: 12px; font-weight: 900;
+    color: #06111f; background: linear-gradient(135deg, #7fb8ff, #a8d4ff);
+    box-shadow: 0 0 14px rgba(127,184,255,0.5); opacity: 0; transition: opacity 0.25s; pointer-events: none;
+  }
+  .viewchip.on { opacity: 1; }
+
+  .result-banner {
+    border: 1.5px solid rgba(62,240,160,0.6); border-radius: 14px; padding: 13px;
+    background: rgba(62,240,160,0.07); text-align: center;
+    font-size: 15.5px; font-weight: 900; color: #d9ffee;
+  }
+  .result-banner small { display: block; font-weight: 600; font-size: 11.5px; color: #8fd8b4; margin-top: 4px; }
+  .minicard {
+    border: 1px solid #1d2c42; border-radius: 15px; padding: 24px 18px; margin-top: 14px;
+    background: linear-gradient(165deg, #0d1524, #0a0f1a);
+    font-size: 19.5px; color: #e2edf8; line-height: 1.85; min-height: 160px;
+    display: flex; align-items: center; justify-content: center; text-align: center; font-weight: 600;
+  }
+  .minicard b { color: #bcdcff; }
+  .minicard em { font-style: normal; color: #ff8f85; }
+  .dots { text-align: center; margin-top: 12px; letter-spacing: 6px; color: #24344a; font-size: 13px; }
+  .dots span { color: #7fb8ff; }
+
+  .qhead { font-size: 13px; font-weight: 800; color: #b491ff; letter-spacing: 1px; margin-bottom: 8px; }
+  .q { font-size: 18px; font-weight: 800; color: #eaf6ff; line-height: 1.7; }
+  .expl {
+    margin-top: 13px; padding: 13px 14px; border-left: 3px solid #3ef0a0; border-radius: 7px;
+    background: rgba(62,240,160,0.06); font-size: 14.5px; color: #c6e4d5; line-height: 1.75;
+  }
+
+  .center { text-align: center; }
+  .stamp {
+    display: inline-block; margin-top: 34px; padding: 25px 22px; border: 3.5px solid #7fb8ff; border-radius: 50%;
+    color: #9fc6ff; font-weight: 900; font-size: 21px; transform: rotate(-11deg);
+    text-shadow: 0 0 14px rgba(127,184,255,0.8);
+    box-shadow: 0 0 26px rgba(127,184,255,0.35), inset 0 0 16px rgba(127,184,255,0.15);
+    animation: stampin 0.45s cubic-bezier(0.2, 2.2, 0.4, 1);
+  }
+  @keyframes stampin { 0% { transform: rotate(-11deg) scale(2.2); opacity: 0; } 100% { transform: rotate(-11deg) scale(1); opacity: 1; } }
+  .stamp small { display: block; font-size: 11px; font-weight: 700; }
+  .clearmsg { margin-top: 18px; font-size: 15px; color: #b3c5d8; line-height: 1.85; }
+  .bossscore { margin-top: 30px; font-size: 42px; font-weight: 900; color: #eef5ff; text-shadow: 0 0 18px rgba(127,184,255,0.7); }
+
+  /* ===== ドリル画面 ===== */
+  .drillcard {
+    border: 1.5px solid rgba(255,140,90,0.6); border-radius: 16px; padding: 18px 16px;
+    background: linear-gradient(160deg, rgba(255,140,90,0.08), rgba(7,10,16,0.2));
+  }
+  .drillhead { font-size: 12px; color: #ffb98f; font-weight: 800; letter-spacing: 1px; }
+  .drillq { font-size: 17.5px; font-weight: 800; color: #f2f8ff; line-height: 1.7; margin-top: 10px; }
+  .drilltag { display: inline-block; margin-top: 8px; font-size: 11px; color: #93a8bd; }
+  .okngrow { display: flex; gap: 10px; margin-top: 16px; }
+  .okngrow button {
+    flex: 1; padding: 18px 6px; border-radius: 14px; font: inherit; font-weight: 900; font-size: 18px; cursor: pointer;
+    border: 2px solid #2a3c56; background: #0b1220; color: #dfeaf6;
+  }
+  .okngrow button.pickOK { border-color: #3ef0a0; color: #3ef0a0; }
+  .okngrow button.pickNG { border-color: #ff5d4d; color: #ff5d4d; }
+  .okngrow button.correct { background: rgba(62,240,160,0.15); box-shadow: 0 0 14px rgba(62,240,160,0.3); }
+  .okngrow button.wrong { background: rgba(255,93,77,0.15); box-shadow: 0 0 14px rgba(255,93,77,0.3); }
+  .okngrow button.dim { opacity: 0.4; }
+  .drillexp {
+    margin-top: 14px; padding: 12px 14px; border-radius: 10px; border-left: 3px solid #ffb98f;
+    background: rgba(255,140,90,0.08); font-size: 14px; color: #ffdcc4; line-height: 1.7;
+  }
+  .drillresultrow { display: flex; justify-content: center; gap: 8px; margin: 20px 0 6px; }
+  .drillresultrow span { width: 30px; height: 30px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 14px; font-weight: 900; }
+  .drillresultrow span.o { background: rgba(62,240,160,0.18); color: #3ef0a0; border: 1.5px solid #3ef0a0; }
+  .drillresultrow span.x { background: rgba(255,93,77,0.18); color: #ff5d4d; border: 1.5px solid #ff5d4d; }
+  .weaklist { margin-top: 16px; font-size: 13px; color: #9fb4cb; line-height: 1.9; text-align: left; }
+  .weaklist b { color: #ffc0a0; }
+
+  /* ===== 10年マスターマップ ===== */
+  .mapstage {
+    display: flex; flex-direction: column-reverse; gap: 10px; margin-top: 8px;
+  }
+  .mapstagebox {
+    border-radius: 14px; padding: 13px 14px; border: 1px solid #1d2c42;
+    background: linear-gradient(165deg, #0d1524, #0a0f1a);
+  }
+  .mapstagebox.current { border-color: rgba(160,123,255,0.7); box-shadow: 0 0 16px rgba(160,123,255,0.2); }
+  .mapstagebox .msTitle { font-size: 13.5px; font-weight: 900; color: #eaf6ff; display: flex; align-items: center; gap: 6px; }
+  .mapstagebox .msYear { font-size: 10.5px; color: #5d7690; font-weight: 600; }
+  .mapstagebox .mspin { color: #d9c8ff; font-size: 13px; }
+  .mapchaps { margin-top: 8px; display: flex; flex-wrap: wrap; gap: 6px; }
+  .mapchap {
+    font-size: 11px; padding: 5px 9px; border-radius: 7px; border: 1px solid #24344a; color: #7f96b0; background: #0b1220;
+  }
+  .mapchap.done { border-color: #7fb8ff; color: #bcdcff; background: rgba(127,184,255,0.1); }
+  .mapchap.now { border-color: #a07bff; color: #d9c8ff; background: rgba(160,123,255,0.14); }
+  .mapbros { margin-top: 18px; padding-top: 14px; border-top: 1px dashed #24344a; }
+  .mapbros .mbTitle { font-size: 12px; color: #5d7690; font-weight: 800; margin-bottom: 8px; }
+  .mapbroslink {
+    display: block; padding: 10px 12px; margin-top: 7px; border-radius: 10px;
+    border: 1px solid #1d2c42; background: #0b1220; color: #8fa6bd; font-size: 12.5px; text-decoration: none;
+  }
+  .mapbroslink b { color: #bcdcff; }
+</style>
+</head>
+<body>
+
+<div id="splash">
+  <div class="sgears"><span class="sgear a">⚙</span><span class="sgear b">⚙</span></div>
+  <div class="stitle">GEAR FORGE</div>
+  <div class="ssub">機械設計 ── 10年でプロになる道場</div>
+  <div class="sskip">タップでスキップ</div>
+</div>
+
+<canvas id="bgfx"></canvas>
+<div id="app">
+
+  <!-- ============ ホーム ============ -->
+  <section id="viewHome" style="display:block">
+    <div class="home-logo">GEAR FORGE</div>
+    <div class="home-sub">機械設計 ── 朝15分・触って選んで覚える道場</div>
+
+    <div class="gearhero">
+      <div class="gstage" id="gearStage"></div>
+      <div class="gline"><b id="gearTitle">発明チャージ 0%</b><span id="gearSub">（歯車 1/8）</span><div class="gbar"><div id="gearBar"></div></div></div>
+    </div>
+
+    <button class="rqcard" id="btnRQ" style="display:none">
+      <div><div class="rqt" id="rqTitle">⚡ 今日の復習 0問</div><div class="rqs">忘れかけた頃に再登場（2分）</div></div>
+      <div class="rqarrow">→</div>
+    </button>
+
+    <button class="resume" id="btnResume"></button>
+    <div class="goalbanner">🎯 ゴール：制約を同時に満たす設計解を出せる設計者</div>
+    <div class="prog-row"><span id="progText"></span><div class="prog-bar"><div class="prog-fill" id="progFill"></div></div><span>クリア</span></div>
+    <div class="chap-title">第1章 図面と公差の言語 <span>（機械設計のきそ・全6回＋ボス）</span></div>
+    <div class="nodes" id="nodes1"></div>
+    <div class="btnrow2">
+      <button class="bb drill" id="btnDrillHome">⚔ 判断ドリル<br><small style="font-weight:600">（5問・2分）</small></button>
+      <button class="bb" id="btnMapHome">🗺 10年<br><small style="font-weight:600">マスターマップ</small></button>
+    </div>
+    <div class="chap2">🔒 第2章 機械要素図鑑へ（軸受・歯車・ばね・カム）<br>第1章クリアで解放（次のアップデートで配信）</div>
+    <div class="streak" id="streakLine"></div>
+    <div class="installhint">スマホ：ブラウザの共有メニュー →「ホーム画面に追加」でアプリになる</div>
+    <div class="verline">GEAR FORGE v1.0 ─ 第1章（ARC/FORCE/VOLT/BENDの兄弟）</div>
+  </section>
+
+  <!-- ============ レッスン ============ -->
+  <section id="viewLesson" style="display:none">
+    <div class="lesson-top">
+      <button class="backbtn" id="btnBack">←</button>
+      <span class="tag" id="lsTag"></span><span id="lsTitle"></span>
+    </div>
+
+    <div id="stageWrap">
+      <div class="stage3d" id="stage3d">
+        <div id="stageChips"></div>
+        <div class="blueov" id="blueov"></div>
+        <div class="viewchip" id="viewchip"></div>
+        <div class="hint3d" id="hint3d">👆 タップ＝操作／ドラッグ＝回転</div>
+        <div class="flash" id="flash"></div>
+        <div class="boom" id="boom"><span class="b1" id="boomText">バキッ!!</span><span class="b2">🔧 画面タップでやり直し</span></div>
+      </div>
+    </div>
+
+    <div id="phMission" style="display:none">
+      <div class="mission-card">
+        <div class="mno" id="msNo"></div>
+        <div class="mq" id="msQ"></div>
+      </div>
+      <div id="msOpts"></div>
+      <div class="mhint">↑ 予想してタップ（外れてもOK。実験で確かめる）</div>
+    </div>
+
+    <div id="phExp" style="display:none">
+      <div class="guessline" id="guessLine"></div>
+      <div class="legend" id="expLegend"></div>
+      <div class="sliderrow"><span id="sliderLabel"></span><input type="range" id="loadRange" min="0" max="100" value="0"><span class="val" id="loadVal">0</span></div>
+      <div class="extra" id="extraCtrls"></div>
+      <div class="trynote" id="expNote"></div>
+      <button class="cta alt" id="btnMicro">📐 図面の目</button>
+      <button class="cta" id="btnToReveal" disabled>答え合わせ →</button>
+    </div>
+
+    <div id="phReveal" style="display:none">
+      <div class="result-banner" id="rvBanner"></div>
+      <div class="minicard" id="rvCard"></div>
+      <div class="dots" id="rvDots"></div>
+      <button class="cta" id="btnCardNext">つぎ →</button>
+    </div>
+
+    <div id="phQuiz" style="display:none">
+      <div class="qhead">ミニクイズ ── 1問だけ</div>
+      <div class="q" id="qzQ"></div>
+      <div id="qzOpts"></div>
+      <div class="expl" id="qzExp" style="display:none"></div>
+      <button class="cta" id="btnQuizDone" style="display:none">クリア！ →</button>
+    </div>
+
+    <div id="phClear" class="center" style="display:none">
+      <div class="stamp" id="clearStamp"></div>
+      <div class="teaser" id="teaserBox"></div>
+      <div class="clearmsg" id="clearMsg"></div>
+      <button class="cta" id="btnGoHome">マップへもどる</button>
+    </div>
+  </section>
+
+  <!-- ============ ボス戦 ============ -->
+  <section id="viewBoss" style="display:none">
+    <div class="lesson-top">
+      <button class="backbtn" id="btnBackB">←</button>
+      <span class="tag">L7</span><span>章ボス戦 ── 7問</span>
+    </div>
+    <div id="bossPlay">
+      <div class="qhead" id="bsProgress"></div>
+      <div class="q" id="bsQ"></div>
+      <div id="bsOpts"></div>
+      <div class="expl" id="bsExp" style="display:none"></div>
+      <button class="cta" id="btnBossNext" style="display:none">つぎ →</button>
+    </div>
+    <div id="bossResult" class="center" style="display:none">
+      <div class="bossscore" id="bsScore"></div>
+      <div class="clearmsg" id="bsMsg"></div>
+      <button class="cta" id="btnBossHome">マップへもどる</button>
+    </div>
+  </section>
+
+  <!-- ============ 判断ドリル ============ -->
+  <section id="viewDrill" style="display:none">
+    <div class="lesson-top">
+      <button class="backbtn" id="btnBackD">←</button>
+      <span class="tag">⚔ DRILL</span><span>設計判断ドリル</span>
+    </div>
+    <div id="drillPlay">
+      <div class="drillcard">
+        <div class="drillhead" id="dqProgress"></div>
+        <div class="drillq" id="dqText"></div>
+        <div class="drilltag" id="dqTag"></div>
+      </div>
+      <div class="okngrow" id="dqOpts">
+        <button id="btnOK">OK</button>
+        <button id="btnNG">NG</button>
+      </div>
+      <div class="drillexp" id="dqExp" style="display:none"></div>
+      <button class="cta" id="btnDrillNext" style="display:none">つぎ →</button>
+    </div>
+    <div id="drillResult" class="center" style="display:none">
+      <div class="bossscore" id="dResultScore"></div>
+      <div class="drillresultrow" id="dResultRow"></div>
+      <div class="weaklist" id="dWeak"></div>
+      <button class="cta" id="btnDrillResultHome">マップへもどる</button>
+    </div>
+  </section>
+
+  <!-- ============ 復習キュー ============ -->
+  <section id="viewReview" style="display:none">
+    <div class="lesson-top">
+      <button class="backbtn" id="btnBackRQ">←</button>
+      <span class="tag">⚡ REVIEW</span><span>今日の復習</span>
+    </div>
+    <div id="reviewPlay">
+      <div class="drillcard">
+        <div class="drillhead" id="rqProgress"></div>
+        <div class="drillq" id="rqText"></div>
+      </div>
+      <div id="rqOpts"></div>
+      <div class="drillexp" id="rqExp" style="display:none"></div>
+      <button class="cta" id="btnRQNext" style="display:none">つぎ →</button>
+    </div>
+    <div id="reviewResult" class="center" style="display:none">
+      <div class="bossscore" id="rqResultScore"></div>
+      <div class="clearmsg">🔥 忘れかけた記憶をしっかり固定した</div>
+      <button class="cta" id="btnRQHome">マップへもどる</button>
+    </div>
+  </section>
+
+  <!-- ============ 10年マスターマップ ============ -->
+  <section id="viewMap" style="display:none">
+    <div class="lesson-top">
+      <button class="backbtn" id="btnBackMap">←</button>
+      <span class="tag">🗺 MAP</span><span>10年マスターマップ</span>
+    </div>
+    <div class="teaser" style="margin-top:0">制約（強度・加工・コスト・納期・安全・調達）を<b>同時に</b>満たす設計解を出せる人になるまでの道。</div>
+    <div class="mapstage" id="mapStage"></div>
+    <div class="mapbros">
+      <div class="mbTitle">別街道（兄弟アプリ）</div>
+      <a class="mapbroslink" href="https://pasarinobuhito0409-droid.github.io/arc-forge/" target="_blank" rel="noopener"><b>ARC FORGE</b> ── 溶接×設計</a>
+      <a class="mapbroslink" href="https://pasarinobuhito0409-droid.github.io/force-forge/" target="_blank" rel="noopener"><b>FORCE FORGE</b> ── 力学×CAE</a>
+      <a class="mapbroslink" href="https://pasarinobuhito0409-droid.github.io/volt-forge/" target="_blank" rel="noopener"><b>VOLT FORGE</b> ── 電気設計</a>
+      <a class="mapbroslink" href="https://pasarinobuhito0409-droid.github.io/bend-forge/" target="_blank" rel="noopener"><b>BEND FORGE</b> ── 板金設計</a>
+    </div>
+  </section>
+
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/loaders/RGBELoader.js"></script>
+<script>
+"use strict";
+
+/* ================================================================
+   GEAR FORGE v1.0 ── 第1章「図面と公差の言語」
+   FORGE家族5作目。合体型＋リアル工場＋専用カード3D×18＋判断ドリル＋復習キュー＋マスターマップ
+================================================================ */
+
+/* ===== 起動スプラッシュ「打刻」：初回1.2秒／2回目以降0.6秒／タップskip ===== */
+(function splash() {
+  const el = document.getElementById("splash");
+  if (!el) return;
+  const SPLASH_KEY = "gear-forge-splash-day";
+  let already = false;
+  try {
+    const today = new Date().toDateString();
+    already = localStorage.getItem(SPLASH_KEY) === today;
+    localStorage.setItem(SPLASH_KEY, today);
+  } catch (e) {}
+  const dur = already ? 600 : 1200;
+  let closed = false;
+  function close() {
+    if (closed) return;
+    closed = true;
+    el.classList.add("off");
+    setTimeout(() => { if (el.parentNode) el.parentNode.removeChild(el); }, 500);
+  }
+  setTimeout(close, dur);
+  el.addEventListener("pointerdown", close);
+})();
+
+/* ===== 背景：自動で描かれる発明ブループリント ===== */
+(function bgFX() {
+  const cv = document.getElementById("bgfx");
+  if (!cv) return;
+  const ctx = cv.getContext("2d");
+  if (!ctx) return;
+  let W = 0, H = 0;
+  function build() {
+    W = cv.width = Math.max(1, Math.floor(innerWidth * Math.min(1.5, devicePixelRatio || 1)));
+    H = cv.height = Math.max(1, Math.floor(innerHeight * Math.min(1.5, devicePixelRatio || 1)));
+  }
+  build();
+  window.addEventListener("resize", build);
+
+  /* モチーフ＝線分列（描く順番つき）。日替わりで開始位置を変える */
+  function gearPts(cx, cy, r, n) {
+    const segs = [];
+    let prev = null;
+    for (let i = 0; i <= n * 4; i++) {
+      const a = i / (n * 4) * Math.PI * 2;
+      const rr = (Math.floor(i / 2) % 2 === 0) ? r : r * 0.82;
+      const p = [cx + Math.cos(a) * rr, cy + Math.sin(a) * rr];
+      if (prev) segs.push([prev, p]);
+      prev = p;
+    }
+    segs.push([[cx - r * 0.25, cy], [cx + r * 0.25, cy]]);
+    segs.push([[cx, cy - r * 0.25], [cx, cy + r * 0.25]]);
+    return { segs, cx, cy, spin: true };
+  }
+  function armPts(cx, cy) {
+    const s = [];
+    s.push([[cx - 60, cy + 70], [cx + 60, cy + 70]]);
+    s.push([[cx - 40, cy + 70], [cx - 40, cy + 40]]);
+    s.push([[cx + 40, cy + 70], [cx + 40, cy + 40]]);
+    s.push([[cx - 40, cy + 40], [cx + 40, cy + 40]]);
+    s.push([[cx, cy + 40], [cx + 55, cy - 30]]);
+    s.push([[cx + 55, cy - 30], [cx + 120, cy - 55]]);
+    for (let i = 0; i < 8; i++) {
+      const a1 = i / 8 * Math.PI * 2, a2 = (i + 1) / 8 * Math.PI * 2;
+      s.push([[cx + 55 + Math.cos(a1) * 12, cy - 30 + Math.sin(a1) * 12], [cx + 55 + Math.cos(a2) * 12, cy - 30 + Math.sin(a2) * 12]]);
+    }
+    s.push([[cx + 120, cy - 55], [cx + 138, cy - 40]]);
+    s.push([[cx + 120, cy - 55], [cx + 142, cy - 66]]);
+    return { segs: s, joint: [cx + 55, cy - 30] };
+  }
+  function camPts(cx, cy) {
+    const s = [];
+    for (let i = 0; i < 16; i++) {
+      const a1 = i / 16 * Math.PI * 2, a2 = (i + 1) / 16 * Math.PI * 2;
+      const r1 = 46 + Math.sin(a1 * 2) * 16, r2 = 46 + Math.sin(a2 * 2) * 16;
+      s.push([[cx + Math.cos(a1) * r1, cy + Math.sin(a1) * r1], [cx + Math.cos(a2) * r2, cy + Math.sin(a2) * r2]]);
+    }
+    // ばね（つづら折り）
+    for (let i = 0; i < 8; i++) {
+      const y1 = cy - 90 + i * 14, y2 = cy - 90 + (i + 1) * 14;
+      const x1 = cx + 110 + (i % 2 === 0 ? -18 : 18), x2 = cx + 110 + (i % 2 === 0 ? 18 : -18);
+      s.push([[x1, y1], [x2, y2]]);
+    }
+    s.push([[cx + 110, cy - 104], [cx + 110, cy - 90]]);
+    return { segs: s, cx, cy, spin: true, spinR: 46 };
+  }
+  function buildMotifs() {
+    const seed = new Date().getDate() % 3;
+    const order = [seed, (seed + 1) % 3, (seed + 2) % 3];
+    const defs = [
+      () => gearPts(W * 0.28, H * 0.26, 58, 10),
+      () => armPts(W * 0.68, H * 0.7),
+      () => camPts(W * 0.32, H * 0.72)
+    ];
+    return order.map((i) => defs[i]);
+  }
+  let motifDefs = buildMotifs();
+  let mi = 0, cur = null, prog = 0, phase = 0, hold = 0, spin = 0;
+  function nextMotif() {
+    if (!W || !H) { cur = { segs: [] }; return; }
+    try { cur = motifDefs[mi % motifDefs.length](); } catch (e) { cur = { segs: [] }; }
+    prog = 0; phase = 0; hold = 0; spin = 0;
+    mi++;
+  }
+  nextMotif();
+
+  let last = performance.now();
+  (function draw(now) {
+    requestAnimationFrame(draw);
+    const dt = Math.min(0.05, (now - last) / 1000);
+    last = now;
+    if (!W || !H || !ctx) return;
+    ctx.clearRect(0, 0, W, H);
+    /* 極薄方眼 */
+    ctx.strokeStyle = "rgba(127,184,255,0.045)";
+    ctx.lineWidth = 1;
+    const step = 30 * Math.min(1.5, devicePixelRatio || 1);
+    for (let x = 0; x < W; x += step) { ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x, H); ctx.stroke(); }
+    for (let y = 0; y < H; y += step) { ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(W, y); ctx.stroke(); }
+
+    if (!cur || !cur.segs || !cur.segs.length) { nextMotif(); return; }
+    const segs = cur.segs;
+    let alpha = 0.5;
+    if (phase === 0) {
+      prog += dt * segs.length * 0.7;
+      if (prog >= segs.length) { phase = 1; hold = 0; }
+    } else if (phase === 1) {
+      spin += dt * 0.9;
+      hold += dt;
+      if (hold > 2.0) phase = 2;
+    } else {
+      hold += dt;
+      alpha = Math.max(0, 0.5 - (hold / 2.0) * 0.5);
+      if (alpha <= 0.002) nextMotif();
+    }
+    const nSeg = phase === 0 ? Math.floor(prog) : segs.length;
+    ctx.strokeStyle = "rgba(150,200,255," + alpha + ")";
+    ctx.lineWidth = 1.4 * Math.min(1.5, devicePixelRatio || 1);
+    for (let i = 0; i < nSeg && i < segs.length; i++) {
+      const seg = segs[i];
+      if (!seg || !seg[0] || !seg[1]) continue;
+      ctx.beginPath(); ctx.moveTo(seg[0][0], seg[0][1]); ctx.lineTo(seg[1][0], seg[1][1]); ctx.stroke();
+    }
+    if (phase === 0 && nSeg < segs.length) {
+      const seg = segs[nSeg];
+      if (seg && seg[0] && seg[1]) {
+        const f = prog - nSeg;
+        const px = seg[0][0] + (seg[1][0] - seg[0][0]) * f, py = seg[0][1] + (seg[1][1] - seg[0][1]) * f;
+        ctx.beginPath(); ctx.moveTo(seg[0][0], seg[0][1]); ctx.lineTo(px, py); ctx.stroke();
+        if (isFinite(px) && isFinite(py)) {
+          const g = ctx.createRadialGradient(px, py, 0, px, py, 18);
+          g.addColorStop(0, "rgba(190,225,255,0.85)");
+          g.addColorStop(1, "rgba(190,225,255,0)");
+          ctx.fillStyle = g;
+          ctx.beginPath(); ctx.arc(px, py, 18, 0, 6.29); ctx.fill();
+        }
+      }
+    }
+    /* 動き出す関節・歯車（2D回転） */
+    if (phase >= 1 && cur.spin && isFinite(cur.cx) && isFinite(cur.cy)) {
+      ctx.save();
+      ctx.translate(cur.cx, cur.cy);
+      ctx.rotate(spin);
+      ctx.strokeStyle = "rgba(255,220,150," + (alpha * 0.9) + ")";
+      ctx.lineWidth = 1.6;
+      const r = cur.spinR || 12;
+      ctx.beginPath(); ctx.moveTo(-r * 0.4, 0); ctx.lineTo(r * 0.4, 0); ctx.stroke();
+      ctx.restore();
+    }
+    if (phase >= 1 && cur.joint && isFinite(cur.joint[0])) {
+      ctx.save();
+      ctx.translate(cur.joint[0], cur.joint[1]);
+      ctx.rotate(Math.sin(spin) * 0.5);
+      ctx.strokeStyle = "rgba(255,220,150," + (alpha * 0.9) + ")";
+      ctx.lineWidth = 1.6;
+      ctx.beginPath(); ctx.arc(0, 0, 10, 0, 6.29); ctx.stroke();
+      ctx.restore();
+    }
+  })(last);
+})();
+
+/* ---------------- レッスンデータ ---------------- */
+const LESSONS = [
+  {
+    id: "l1", tag: "L1", label: "設計", title: "機械設計ってなに？",
+    mission: {
+      no: "MISSION 01 ── 最初の一歩",
+      q: "機械設計の仕事、<br>最初の一歩は？",
+      opts: ["かっこいい形を描く", "困りごとを聞く", "材料を選ぶ"], ans: 1,
+      ansLine: "困りごとを聞く（要求からすべてが始まる）"
+    },
+    sliderLabel: "工程", val: (v) => Math.round(v) + "%", grabAxis: "x", springBack: false,
+    note: "「重い箱を10cm持ち上げたい」という困りごと。<br>スライダーで<b>てこ→ネジジャッキ</b>が組み上がり箱が持ち上がる。",
+    legend: ['<span style="color:#7fb8ff">■ てこ（支点で力を増やす）</span>', '<span style="color:#ffd64f">■ ネジ（回して押し上げる）</span>'],
+    cards: [
+      "設計（せっけい）＝<br>困りごとを<b>形に翻訳</b>する仕事。<br>「持ち上げたい」→装置。",
+      "翻訳の言語が<b>図面</b>。<br>頭の中の形を、<br>誰でも作れる紙に変える。",
+      "明日から機械を見る目が<br>変わる。<em>「これは誰かの<br>困りごとの答え」</em>に見える。"
+    ],
+    quiz: {
+      q: "設計の出発点は？",
+      opts: ["きれいな形", "困りごと（要求）", "使う材料"], ans: 1,
+      exp: "困りごと（要求）が先。形も材料もそれを満たす手段でしかない。ここを間違えると設計は迷走する。"
+    },
+    teaser: "機械を見る目が<b>「答え合わせの目」</b>に変わる"
+  },
+  {
+    id: "l2", tag: "L2", label: "図面", title: "図面＝3つの窓",
+    mission: {
+      no: "MISSION 02 ── 第三角法",
+      q: "立体を紙1枚の絵で<br>正確に伝えられる？",
+      opts: ["できる", "1枚じゃ嘘がつける"], ans: 1,
+      ansLine: "1枚じゃ嘘がつける（別の形と区別できない）"
+    },
+    sliderLabel: "回転", val: (v) => Math.round(v) + "%", grabAxis: "x", springBack: false,
+    note: "中央のL金具が回る。<b>正面・上・横の3枚の窓</b>に輪郭が投影される。<br>100%で3面図に展開。",
+    legend: ['<span style="color:#7fb8ff">■ 正面図の窓</span>', '<span style="color:#ffd64f">■ 平面図（上）の窓</span>', '<span style="color:#3ef0a0">■ 側面図（横）の窓</span>'],
+    cards: [
+      "図面＝<b>3つの窓</b>から見た<br>影（かげ）の記録。<br>正面・上・横。",
+      "1枚では別の形と<br><em>区別できない</em>（嘘がつける）。<br>3枚そろって初めて形が確定。",
+      "並べ方のルールが<br><b>第三角法</b>（JIS＝<br>日本の工業規格）。"
+    ],
+    quiz: {
+      q: "日本の図面の並べ方は？",
+      opts: ["第一角法", "第三角法", "決まりはない"], ans: 1,
+      exp: "JIS（日本工業規格）は第三角法。正面図の右に側面図、上に平面図を置く。海外は第一角法の国もあり注意。"
+    },
+    teaser: "「立体⇔図面」を<b>変換できる目</b>が育ちはじめる"
+  },
+  {
+    id: "l3", tag: "L3", label: "公差", title: "寸法公差（ぴったりは無い）",
+    mission: {
+      no: "MISSION 03 ── 「10」とだけ書いたら",
+      q: "図面に『10』とだけ書いた。<br>届く部品は？",
+      opts: ["全部10.00ぴったり", "10.01や9.98が混ざる"], ans: 1,
+      ansLine: "10.01や9.98が混ざる（必ずばらつく）"
+    },
+    sliderLabel: "公差帯", val: (v) => "±" + (0.5 - v / 100 * 0.49).toFixed(2), grabAxis: "x", springBack: false,
+    note: "「10」指示の丸棒が5本流れてくる。<b>10.02/9.99/10.05…</b>とばらつく。<br>公差帯スライダーで合格/不合格が変わる。",
+    legend: ['<span style="color:#3ef0a0">■ 帯の中＝合格</span>', '<span style="color:#ff5d4d">■ 帯の外＝不合格（弾かれる）</span>'],
+    cards: [
+      "世界に<b>ぴったりは無い</b>。<br>どんな加工も<em>必ずばらつく</em>。<br>これが工業の大前提。",
+      "公差（こうさ）＝<br>許す<b>ばらつきの幅</b>。<br>広ければ何でも合格。",
+      "きつい公差＝<br><b>お金と時間が跳ね上がる</b>。<br>±0.01は別世界の値段。"
+    ],
+    quiz: {
+      q: "公差を厳しくすると？",
+      opts: ["安くなる", "高くなる", "変わらない"], ans: 1,
+      exp: "公差が厳しいほど工程・検査・不良率が跳ね上がりコスト増。機能に必要な所だけ絞るのが設計の腕。"
+    },
+    teaser: "図面の数字1つに<b>お金の重さ</b>を感じる目になる"
+  },
+  {
+    id: "l4", tag: "L4", label: "はめあい", title: "はめあい（穴と軸）",
+    mission: {
+      no: "MISSION 04 ── 回したい軸のすきま",
+      q: "回したい軸。<br>穴とのすきまは？",
+      opts: ["少しすきま", "ぴったり", "押し込む"], ans: 0,
+      ansLine: "少しすきま（回す・滑らす＝すきまばめ）"
+    },
+    sliderLabel: "モード", val: (v) => v < 34 ? "すきま" : v < 67 ? "中間" : "しまり", grabAxis: "x", springBack: false,
+    note: "穴ブロックに軸を挿入。モード切替で挿入アニメが変わる。<br><b>スッと入り回る／軽く叩く／プレスで圧入</b>。",
+    legend: ['<span style="color:#3ef0a0">■ すきまばめ＝回る</span>', '<span style="color:#ffd64f">■ 中間ばめ＝ぴったり止まる</span>', '<span style="color:#ff5d4d">■ しまりばめ＝一体化</span>'],
+    cards: [
+      "はめあい＝<br>穴と軸の<b>関係の設計</b>。<br>すきま量を決める仕事。",
+      "回す・滑らす＝<b>すきま</b>。<br>固定して一体＝<b>しまり</b>。<br>中間はぴったり止まる。",
+      "H7/g6などの記号は<br>関係の<b>暗号</b>（暗号表はJIS）。<br>現場はこの記号で会話する。"
+    ],
+    quiz: {
+      q: "ベアリングを軸に固定したい。どちら寄り？",
+      opts: ["すきま寄り", "しまり寄り"], ans: 1,
+      exp: "軸に対して固定したい（内輪回転にしたい）ならしまり寄り。空転・共回りを防ぐ。回転する側は締める、が基本の考え方。"
+    },
+    teaser: "図面のH7/g6が<b>会話できる暗号</b>になる"
+  },
+  {
+    id: "l5", tag: "L5", label: "ネジ", title: "ネジ（斜面の魔法と緩みの正体）",
+    mission: {
+      no: "MISSION 05 ── 緩む本当の理由",
+      q: "ネジが緩む<br>本当の理由は？",
+      opts: ["ネジ山がへる", "振動でナットが滑って回り戻る", "磁気"], ans: 1,
+      ansLine: "振動でナットが滑って回り戻る（ネジ山が減るわけではない）"
+    },
+    sliderLabel: "振動", val: (v) => Math.round(v) + "%", grabAxis: "x", springBack: false,
+    note: "ボルトを締め付ける（軸が伸びて赤色＝張力で噛む）。<br>振動スライダーでナットが<b>じわじわ回り戻る</b>。",
+    legend: ['<span style="color:#ff7a6e">■ 赤＝伸びて張力が出た軸</span>', '<span style="color:#ffd64f">■ 振動でナットが回転</span>'],
+    cards: [
+      "ネジ＝<b>斜面を巻いた</b>道具。<br>小さい力で<br>大きい締付けが出せる。",
+      "締付けの正体＝<br>ボルトを<b>伸ばして</b>、<br>その戻り力で噛みつく。",
+      "緩み対策は<b>保険の重ねがけ</b>。<br>ばね座金・ロック剤・<br>ダブルナットを併用。"
+    ],
+    quiz: {
+      q: "締付けたボルトの中身は？",
+      opts: ["ちぢんで押されている", "伸びて引っ張られている", "何も起きていない"], ans: 1,
+      exp: "ボルトはわずかに伸び、その戻ろうとする力（軸力）で部品を挟み続ける。伸びが緩みへの耐性になる。"
+    },
+    teaser: "ボルト1本の中に<b>見えない張力</b>が見える目になる"
+  },
+  {
+    id: "l6", tag: "L6", label: "要素", title: "機械要素の顔ぶれ（設計のレゴ）",
+    mission: {
+      no: "MISSION 06 ── 支えながら回す部品",
+      q: "軸を『支えながら回す』<br>部品は？",
+      opts: ["歯車", "軸受（ベアリング）", "ばね"], ans: 1,
+      ansLine: "軸受（じくうけ＝ベアリング）（回転を支える専門部品）"
+    },
+    sliderLabel: "工程", val: (v) => Math.round(v) + "%", grabAxis: "x", springBack: false,
+    note: "回転軸ユニットが組み上がる：<b>軸→軸受2個（支える）→歯車（伝える）→キー（空回り止め）→回転！</b>",
+    legend: ['<span style="color:#7fb8ff">■ 軸受＝支える</span>', '<span style="color:#ffd64f">■ 歯車＝伝える</span>', '<span style="color:#3ef0a0">■ キー＝空回り止め</span>'],
+    cards: [
+      "機械要素＝設計の<br><b>レゴブロック</b>。<br>軸・軸受・歯車・ばね・ネジ。",
+      "いまは<b>選ぶ時代</b>。<br>カタログから選定する。<br>自作はほぼしない。",
+      "設計力＝<br>ブロックの<b>組み合わせ力</b>。<br>正しく選び正しくつなぐ。"
+    ],
+    quiz: {
+      q: "キーの役目は？",
+      opts: ["見た目を整える", "軸と歯車の空回り止め", "重さを減らす"], ans: 1,
+      exp: "キー（角材の小片）が軸と歯車の溝にはまり、回転力を確実に伝える。無いと軸だけ空回りしてしまう。"
+    },
+    teaser: "装置の中身が<b>「知ってる顔」</b>だらけになる"
+  }
+];
+
+const BOSS = [
+  { q: "設計の出発点は？", opts: ["きれいな形", "困りごと（要求）", "材料"], ans: 1,
+    exp: "困りごと（要求）が先。形と材料はそれを満たす手段。" },
+  { q: "日本の図面の並べ方は？", opts: ["第一角法", "第三角法", "決まりはない"], ans: 1,
+    exp: "JIS（日本工業規格）は第三角法。" },
+  { q: "公差を厳しくすると？", opts: ["安くなる", "高くなる", "変わらない"], ans: 1,
+    exp: "工程・検査・不良率が跳ね上がりコスト増。" },
+  { q: "回したい軸と穴の関係は？", opts: ["すきまばめ", "しまりばめ", "溶接"], ans: 0,
+    exp: "回す・滑らす＝すきまばめ。固定は逆にしまりばめ。" },
+  { q: "締付けたボルトの中身は？", opts: ["ちぢんでいる", "伸びて引っ張られている", "変化なし"], ans: 1,
+    exp: "伸びの戻り力（軸力）で部品を挟み続ける。" },
+  { q: "軸を支えながら回す部品は？", opts: ["歯車", "軸受（ベアリング）", "ばね"], ans: 1,
+    exp: "軸受＝回転を支える専門部品。" },
+  { q: "ネジが緩む本当の理由は？", opts: ["ネジ山がへる", "振動で回り戻る", "磁気"], ans: 1,
+    exp: "振動でナットが微小に滑って回転方向に戻る。ネジ山の摩耗が主因ではない。" }
+];
+
+/* ---------------- 判断ドリル（第1章・24問全文＝別紙Aどおり） ---------------- */
+const DRILLS = [
+  { id: "z1", tag: "図面(zumen)", situation: "穴位置の寸法が斜め矢印だけで、基準面から追えない図面が出てきた。", ans: "NG",
+    reason: "基準（データム基準面）から追えない寸法は現場で解釈がブレる。", fix: "対策：基準面を決め、そこからの寸法で指示し直す。" },
+  { id: "z2", tag: "図面(zumen)", situation: "同じ寸法が図面の2か所に重複して記入されている。", ans: "NG",
+    reason: "二重寸法は矛盾のもと。改訂時に片方だけ直して食い違う事故が多い。", fix: "対策：寸法は1箇所だけに記入し、他は参考寸法（カッコ書き）にする。" },
+  { id: "z3", tag: "図面(zumen)", situation: "板厚だけを示す側面図が無い、1枚の板金図面が現場に渡った。", ans: "OK",
+    reason: "板金は展開図＋板厚注記（例：t1.6）があれば1枚で成立する。", fix: "側面図が無くても板厚注記が明記されていればOK。" },
+  { id: "z4", tag: "図面(zumen)", situation: "「バリなきこと」の注記がない打抜き部品。人が手で触る場所がある。", ans: "NG",
+    reason: "注記が無いとバリ（打抜きのふち）が残ったまま出荷され、ケガのもとになる。", fix: "対策：触る場所には「バリなきこと」等の注記を必ず入れる。" },
+  { id: "k1", tag: "公差(kousa)", situation: "±0.005という精密公差を、普通旋盤しかない町工場に発注した。", ans: "NG",
+    reason: "普通旋盤の精度では安定して出せない公差。不良連発かコスト激増になる。", fix: "対策：加工設備に見合った公差に緩めるか、精密加工の工場に発注する。" },
+  { id: "k2", tag: "公差(kousa)", situation: "機能に効かないざぐり（皿もみ）の深さに公差±0.5を指示した。", ans: "OK",
+    reason: "機能に影響しない箇所はゆるい公差でよい。加工も検査も楽になる。", fix: "重要度に応じて公差の強弱をつけるのが正しい判断。" },
+  { id: "k3", tag: "公差(kousa)", situation: "樹脂成形品に、金属部品並みの±0.02という公差を指示した。", ans: "NG",
+    reason: "樹脂は成形収縮率が大きく、金属並みの精度は安定して出せない。", fix: "対策：樹脂の収縮特性に合った公差（一般的にもっと緩い）に見直す。" },
+  { id: "k4", tag: "公差(kousa)", situation: "機能に関係しない外形寸法にJIS普通公差（指示なしの標準公差）を適用した。", ans: "OK",
+    reason: "重要でない外形は普通公差で十分。個別指示の手間もコストも省ける。", fix: "普通公差の活用は正しい設計判断。" },
+  { id: "h1", tag: "はめあい(hameai)", situation: "スライドさせたい丸棒とブッシュの穴・軸を H7/g6 で指示した。", ans: "OK",
+    reason: "H7/g6はすきまばめの代表的な組み合わせで、滑らせる用途に適する。", fix: "スライド・回転用途として妥当な選定。" },
+  { id: "h2", tag: "はめあい(hameai)", situation: "毎回抜き差しする位置決めピンに、しまりばめを指定した。", ans: "NG",
+    reason: "しまりばめは圧入前提で、毎回の抜き差しには固すぎて傷や摩耗を招く。", fix: "対策：中間ばめなど、手や軽い工具で抜き差しできる関係に見直す。" },
+  { id: "h3", tag: "はめあい(hameai)", situation: "ベアリング内輪が回転する使い方で、軸をすきまばめにした。", ans: "NG",
+    reason: "内輪回転の場合、軸側がすきまだと内輪が軸の上で滑って共回り・摩耗する。", fix: "対策：内輪回転なら軸をしまりばめ（内輪固定側）にする。" },
+  { id: "h4", tag: "はめあい(hameai)", situation: "樹脂部品への圧入に、金属部品と同じしめしろ（締め代）を使った。", ans: "NG",
+    reason: "樹脂はクリープ（持続荷重でじわじわ変形）するため、時間とともに締結力が抜けて緩む。", fix: "対策：樹脂のクリープ特性を見込んだしめしろに減らす、または別の固定方法にする。" },
+  { id: "n1", tag: "ネジ(neji)", situation: "振動する機械の締結に、ナット1個だけで座金（ワッシャー）を使わなかった。", ans: "NG",
+    reason: "振動下ではナットが緩みやすく、座金なしでは戻り止め効果が弱い。", fix: "対策：ばね座金やロック剤など緩み止めを追加する。" },
+  { id: "n2", tag: "ネジ(neji)", situation: "アルミの雌ねじに、高強度ボルトを目一杯のトルクで締め付けた。", ans: "NG",
+    reason: "アルミは鋼より柔らかく、ボルトの強度に負けてねじ山がつぶれる（山が負ける）。", fix: "対策：アルミ側の強度に合わせてトルクを下げる、またはヘリサート等で山を補強する。" },
+  { id: "n3", tag: "ネジ(neji)", situation: "1.0mmの薄板に直接M3のタップ（雌ねじ）を切った。", ans: "NG",
+    reason: "薄板では山が2枚程度しか掛からず、すぐ抜けてしまう。", fix: "対策：バーリング（穴のふちに襟を立てる加工）で山数を稼ぐ（BEND FORGE連携）。" },
+  { id: "n4", tag: "ネジ(neji)", situation: "ダブルナットを締める時、上のナットを先に本締めした。", ans: "NG",
+    reason: "ダブルナットは締める順番に意味があり、上を先に締めると効果が出ない。", fix: "正しい順序：下ナットを軽く締める→上ナットを本締め→下ナットを反対方向に戻し締め。" },
+  { id: "n5", tag: "ネジ(neji)", situation: "同じ部品を留める4本のボルトを、対角の順番で締め付けた。", ans: "OK",
+    reason: "対角締めは締付け力を均等に伝え、部品の片当たりや歪みを防ぐ正しい手順。", fix: "複数ボルトの締結は対角順が基本。" },
+  { id: "y1", tag: "要素(youso)", situation: "2個の軸受（ベアリング）の間隔を極端に狭くし、両端の遠い位置に荷重をかけた。", ans: "NG",
+    reason: "支点間が狭いとテコの原理でモーメント（曲げようとする力）が拡大し、軸受に過大な負担がかかる。", fix: "対策：軸受間隔を広げるか、荷重点を軸受に近づける。" },
+  { id: "y2", tag: "要素(youso)", situation: "かみ合う歯車2枚の芯間距離（軸と軸の距離）に公差を指定しなかった。", ans: "NG",
+    reason: "芯間距離がばらつくと歯のかみ合いが浅すぎ・深すぎになり、異音や早期摩耗の原因になる。", fix: "対策：芯間距離にも適切な公差を指示する。" },
+  { id: "y3", tag: "要素(youso)", situation: "キー溝を設けず、摩擦だけで軸から歯車へ大トルクを伝えようとした。", ans: "NG",
+    reason: "摩擦だけの伝達は大トルクに対して滑りやすく、空転や破損のリスクが高い。", fix: "対策：キー溝＋キーで機械的にかみ合わせて伝達する。" },
+  { id: "y4", tag: "要素(youso)", situation: "ばねを密着長（コイルが完全に詰まる長さ）まで縮める設計にした。", ans: "NG",
+    reason: "密着まで使うとばねに過大な応力がかかり、へたり（弾性劣化）や折損を招く。", fix: "対策：密着長まで余裕を残した使用範囲に設計する。" },
+  { id: "y5", tag: "要素(youso)", situation: "回転する部品に、飛び出したキリ穴（加工用の下穴）がそのまま残っている。", ans: "NG",
+    reason: "回転部の突起は安全上の危険物になり、さらに重量バランスも崩れて振動の原因になる。", fix: "対策：不要な突起は面一に仕上げるか、バランス取りを行う。" },
+  { id: "y6", tag: "要素(youso)", situation: "モーターに直結する軸に、多少のたわみを許容するカップリング（軸継手）を使った。", ans: "OK",
+    reason: "軸の芯ずれを吸収できるたわみ性カップリングは、モーター直結の定番選定。", fix: "芯ずれ吸収の観点から妥当な選定。" },
+  { id: "y7", tag: "要素(youso)", situation: "定期点検で必ず外すカバーを、溶接で固定してしまった。", ans: "NG",
+    reason: "溶接すると点検のたびに切断・再溶接が必要になり、メンテナンス性が最悪になる。", fix: "対策：点検で外すカバーはネジ止めなど着脱可能な固定にする。" }
+];
+
+/* ---------------- 進捗（localStorage） ---------------- */
+const STORE_KEY = "gear-forge-v1";
+let progress = { done: {}, streak: { week: "", n: 0 }, broken: 0 };
+try {
+  const raw = localStorage.getItem(STORE_KEY);
+  if (raw) progress = Object.assign(progress, JSON.parse(raw));
+} catch (e) {}
+function saveProgress() {
+  try { localStorage.setItem(STORE_KEY, JSON.stringify(progress)); } catch (e) {}
+}
+function isoWeek(d) {
+  const t = new Date(Date.UTC(d.getFullYear(), d.getMonth(), d.getDate()));
+  const day = (t.getUTCDay() + 6) % 7;
+  t.setUTCDate(t.getUTCDate() - day + 3);
+  const firstThu = new Date(Date.UTC(t.getUTCFullYear(), 0, 4));
+  const fday = (firstThu.getUTCDay() + 6) % 7;
+  firstThu.setUTCDate(firstThu.getUTCDate() - fday + 3);
+  return t.getUTCFullYear() + "-W" + String(1 + Math.round((t - firstThu) / 6048e5)).padStart(2, "0");
+}
+function nextWeekOf(wkStr) {
+  const m = wkStr.match(/(\d+)-W(\d+)/);
+  if (!m) return "";
+  const d = new Date(Date.UTC(+m[1], 0, 4));
+  d.setUTCDate(d.getUTCDate() + (+m[2]) * 7);
+  return isoWeek(d);
+}
+function bumpStreak() {
+  const wk = isoWeek(new Date());
+  const s = progress.streak;
+  if (s.week === wk) return;
+  s.n = (s.week && nextWeekOf(s.week) === wk) ? s.n + 1 : 1;
+  s.week = wk;
+}
+
+/* ---------------- 復習キュー（間隔反復・簡略SM-2） ---------------- */
+const RQ_KEY = "gear-forge-rq-v1";
+const RQ_INTERVALS = [1, 3, 7, 18, 45, 112]; // 日
+const RQ_DAY_LIMIT = 5;
+let reviewQueue = [];
+try {
+  const raw = localStorage.getItem(RQ_KEY);
+  if (raw) reviewQueue = JSON.parse(raw) || [];
+} catch (e) {}
+function saveRQ() {
+  try { localStorage.setItem(RQ_KEY, JSON.stringify(reviewQueue)); } catch (e) {}
+}
+function rqUpsert(id, src) {
+  const now = Date.now();
+  let item = reviewQueue.find((r) => r.id === id);
+  if (!item) {
+    item = { id, due: now + 86400000, interval: 1, src };
+    reviewQueue.push(item);
+  } else {
+    item.due = now + 86400000;
+    item.interval = 1;
+    item.src = src;
+  }
+  saveRQ();
+}
+function rqAnswer(item, correct) {
+  if (correct) {
+    const idx = RQ_INTERVALS.indexOf(item.interval);
+    const next = idx >= 0 && idx < RQ_INTERVALS.length - 1 ? RQ_INTERVALS[idx + 1] : Math.round(item.interval * 2.5);
+    item.interval = next;
+  } else {
+    item.interval = 1;
+  }
+  item.due = Date.now() + item.interval * 86400000;
+  saveRQ();
+}
+function rqDueList() {
+  const now = Date.now();
+  return reviewQueue.filter((r) => r.due <= now).slice(0, RQ_DAY_LIMIT);
+}
+/* 復習キューの中身を実データ（クイズ/ボス問題/ドリル）から解決する */
+function rqResolveQuestion(item) {
+  const s = item.src || {};
+  if (s.type === "quiz") {
+    const L = LESSONS.find((x) => x.id === s.lessonId);
+    if (!L) return null;
+    return { q: L.quiz.q, opts: L.quiz.opts, ans: L.quiz.ans, exp: L.quiz.exp };
+  }
+  if (s.type === "boss") {
+    const b = BOSS[s.idx];
+    if (!b) return null;
+    return { q: b.q, opts: b.opts, ans: b.ans, exp: b.exp };
+  }
+  if (s.type === "drill") {
+    const d = DRILLS.find((x) => x.id === s.drillId);
+    if (!d) return null;
+    return { q: d.situation, opts: ["OK", "NG"], ans: d.ans === "OK" ? 0 : 1, exp: d.reason + " " + d.fix, drill: true };
+  }
+  return null;
+}
+
+/* ---------------- ドリル成績 ---------------- */
+const DRILL_STORE_KEY = "gear-forge-drill-v1";
+let drillStats = { seen: {}, wrong: {}, correctCount: 0, totalCount: 0 };
+try {
+  const raw = localStorage.getItem(DRILL_STORE_KEY);
+  if (raw) drillStats = Object.assign(drillStats, JSON.parse(raw));
+} catch (e) {}
+function saveDrillStats() {
+  try { localStorage.setItem(DRILL_STORE_KEY, JSON.stringify(drillStats)); } catch (e) {}
+}
+function pickDrillSet(n) {
+  const unseen = DRILLS.filter((d) => !drillStats.seen[d.id]);
+  const wrongIds = Object.keys(drillStats.wrong).filter((id) => drillStats.wrong[id] > 0);
+  const wrongPool = DRILLS.filter((d) => wrongIds.includes(d.id));
+  const pool = [];
+  const pushUnique = (arr) => { arr.forEach((d) => { if (!pool.find((p) => p.id === d.id)) pool.push(d); }); };
+  pushUnique(shuffleArr(unseen.slice()));
+  pushUnique(shuffleArr(wrongPool.slice()));
+  pushUnique(shuffleArr(DRILLS.slice()));
+  return pool.slice(0, n);
+}
+function shuffleArr(arr) {
+  for (let i = arr.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [arr[i], arr[j]] = [arr[j], arr[i]];
+  }
+  return arr;
+}
+
+/* ---------------- 画面切りかえ ---------------- */
+const $ = (id) => document.getElementById(id);
+function showView(name) {
+  ["viewHome", "viewLesson", "viewBoss", "viewDrill", "viewReview", "viewMap"].forEach((v) => { $(v).style.display = v === name ? "block" : "none"; });
+  window.scrollTo(0, 0);
+}
+function setPhase(name) {
+  ["phMission", "phExp", "phReveal", "phQuiz", "phClear"].forEach((p) => { $(p).style.display = p === name ? "block" : "none"; });
+  const sw = $("stageWrap");
+  if (name === "phExp") { sw.style.display = "block"; sw.classList.remove("mini"); }
+  else if (name === "phReveal") { sw.style.display = "block"; sw.classList.add("mini"); }
+  else sw.style.display = "none";
+  if (ST && !ST.fake) requestAnimationFrame(() => ST.resize());
+  window.scrollTo(0, 0);
+}
+function vib(p) { try { navigator.vibrate && navigator.vibrate(p); } catch (e) {} }
+
+/* ---------------- ホーム描画 ---------------- */
+function lessonState(i) {
+  const isBoss = i >= LESSONS.length;
+  const id = isBoss ? "l7" : LESSONS[i].id;
+  if (progress.done[id]) return "done";
+  if (!isBoss && LESSONS[i].alwaysOpen) return "now";
+  const prevDone = i === 0 ? true : (!isBoss ? !!progress.done[LESSONS[i - 1].id] : LESSONS.every((L) => progress.done[L.id]));
+  return prevDone ? "now" : "lock";
+}
+const PROG_KEYS = LESSONS.map((L) => L.id).concat(["l7"]);
+function clearedCount() {
+  return PROG_KEYS.filter((k) => progress.done[k]).length;
+}
+function renderHome() {
+  const wrap = $("nodes1");
+  wrap.innerHTML = "";
+  const labels = LESSONS.map((L) => L.label).concat(["ボス"]);
+  for (let i = 0; i < labels.length; i++) {
+    const st = lessonState(i);
+    const b = document.createElement("button");
+    b.className = "node " + st;
+    const face = i < LESSONS.length ? LESSONS[i].tag.replace("L", "") : "★";
+    b.innerHTML = '<div class="dot">' + (st === "done" ? "✓" : face) + '</div><div class="lbl">' + labels[i] + "</div>";
+    if (st !== "lock") b.addEventListener("click", () => (i < LESSONS.length ? openLesson(i) : openBoss()));
+    wrap.appendChild(b);
+  }
+  const count = clearedCount();
+  $("progText").textContent = count + "/" + PROG_KEYS.length;
+  $("progFill").style.width = Math.round((count / PROG_KEYS.length) * 100) + "%";
+  const next = LESSONS.map((_, i) => i).find((i) => lessonState(i) === "now");
+  const btn = $("btnResume");
+  if (count === PROG_KEYS.length) {
+    btn.innerHTML = "🏆 第1章 全クリ！<small>ボス戦にもう一度挑める／第2章は次のアップデート</small>";
+    btn.onclick = openBoss;
+  } else if (next === undefined) {
+    btn.innerHTML = "▶ ボス戦へ<small>L7 章ボス戦（7問）</small>";
+    btn.onclick = openBoss;
+  } else {
+    const L = LESSONS[next];
+    btn.innerHTML = (count === 0 ? "▶ はじめる" : "▶ つづきから") + "<small>" + L.tag + " " + L.title + "</small>";
+    btn.onclick = () => openLesson(next);
+  }
+  const s = progress.streak;
+  $("streakLine").textContent = (s.n > 0 ? "🔥 " + s.n + "週れんぞく" : "🔥 今週から積み上げ開始") + "／破断させたボルト " + (progress.broken || 0) + "本";
+
+  /* 復習キューカード（due時のみ表示） */
+  const due = rqDueList();
+  const rqBtn = $("btnRQ");
+  if (due.length > 0) {
+    rqBtn.style.display = "flex";
+    $("rqTitle").textContent = "⚡ 今日の復習 " + due.length + "問";
+    rqBtn.onclick = openReview;
+  } else {
+    rqBtn.style.display = "none";
+  }
+
+  renderGearHero(count);
+}
+
+/* ================================================================
+   ★育つ歯車機構（ホームヒーロー・共有ステージとは別の軽量シーン）
+   クリア済みアイテム数ぶん歯車が増える（1個→8個）。ドラッグで慣性回転。WebGL不可でも死なない。
+================================================================ */
+const GEAR_TOTAL = PROG_KEYS.length; // 7（L1-L6+ボス）だが表示上は「歯車 M/8」に正規化
+const GEAR_DEFS = [
+  { x: 0, y: 0, r: 0.5, teeth: 12, color: 0xb8c2cc },
+  { x: -0.86, y: 0.22, r: 0.36, teeth: 10, color: 0xc9a86a },
+  { x: 0.82, y: -0.28, r: 0.32, teeth: 9, color: 0x8fa6c0 },
+  { x: -0.5, y: -0.62, r: 0.26, teeth: 8, color: 0xb8c2cc },
+  { x: 1.25, y: 0.32, r: 0.24, teeth: 8, color: 0xc9a86a },
+  { x: -1.35, y: -0.15, r: 0.22, teeth: 7, color: 0x8fa6c0 },
+  { x: 0.35, y: 0.68, r: 0.22, teeth: 7, color: 0xb8c2cc },
+  { x: 1.6, y: -0.5, r: 0.2, teeth: 6, color: 0xc9a86a }
+];
+let GH = null; // gear-hero state
+function gearHeroCountFor(cleared) {
+  /* 進捗0でも歯車1個（1年目・最初の一歩の比喩）。全PROG_KEYS到達で8個。 */
+  return Math.max(1, Math.min(8, 1 + Math.round(cleared / GEAR_TOTAL * 7)));
+}
+function ensureGearHero() {
+  if (GH) return GH;
+  const host = $("gearStage");
+  if (!host) return null;
+  if (typeof THREE === "undefined") {
+    host.insertAdjacentHTML("beforeend", '<div class="gfallback">3D表示にはネット接続が必要です<br>（歯車 1/8）</div>');
+    GH = { fake: true };
+    return GH;
+  }
+  let renderer;
+  try {
+    renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+  } catch (e) {
+    host.insertAdjacentHTML("beforeend", '<div class="gfallback">3D表示ができません</div>');
+    GH = { fake: true };
+    return GH;
+  }
+  renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
+  const w0 = Math.max(1, host.clientWidth), h0 = Math.max(1, host.clientHeight);
+  renderer.setSize(w0, h0);
+  renderer.shadowMap.enabled = true;
+  renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+  host.insertBefore(renderer.domElement, host.firstChild);
+  const scene = new THREE.Scene();
+  const camera = new THREE.PerspectiveCamera(38, w0 / h0, 0.1, 60);
+  camera.position.set(0, 0.35, 4.5);
+  camera.lookAt(0, 0, 0);
+  scene.add(new THREE.HemisphereLight(0xbfd0e0, 0x1c1610, 0.55));
+  const key = new THREE.DirectionalLight(0xf0f4ff, 1.0);
+  key.position.set(2.5, 4, 2.5);
+  key.castShadow = true;
+  key.shadow.mapSize.set(512, 512);
+  scene.add(key);
+  const rimA = new THREE.PointLight(0x7fb8ff, 1.0, 14); rimA.position.set(-3, 1.5, -2); scene.add(rimA);
+  const rimB = new THREE.PointLight(0xa07bff, 0.7, 14); rimB.position.set(3, 0.8, -2.5); scene.add(rimB);
+  const group = new THREE.Group();
+  scene.add(group);
+  const floor = new THREE.Mesh(new THREE.PlaneGeometry(8, 4), new THREE.MeshStandardMaterial({ color: 0x0c1220, metalness: 0.3, roughness: 0.9 }));
+  floor.rotation.x = -Math.PI / 2;
+  floor.position.y = -1.15;
+  floor.receiveShadow = true;
+  group.add(floor);
+
+  const gearMeshes = [];
+  function mkGear(def) {
+    const g = new THREE.Group();
+    const mat = new THREE.MeshStandardMaterial({ color: def.color, metalness: 0.85, roughness: 0.35, envMapIntensity: 1.0 });
+    const disk = new THREE.Mesh(new THREE.CylinderGeometry(def.r, def.r, 0.16, 32), mat);
+    disk.rotation.x = Math.PI / 2;
+    disk.castShadow = true;
+    g.add(disk);
+    const hub = new THREE.Mesh(new THREE.CylinderGeometry(def.r * 0.22, def.r * 0.22, 0.26, 16), new THREE.MeshStandardMaterial({ color: 0x39424f, metalness: 0.7, roughness: 0.4 }));
+    hub.rotation.x = Math.PI / 2;
+    g.add(hub);
+    for (let i = 0; i < def.teeth; i++) {
+      const a = i / def.teeth * Math.PI * 2;
+      const tooth = new THREE.Mesh(new THREE.BoxGeometry(def.r * 0.22, def.r * 0.16, 0.16), mat);
+      tooth.position.set(Math.cos(a) * (def.r + def.r * 0.07), Math.sin(a) * (def.r + def.r * 0.07), 0);
+      tooth.rotation.z = a;
+      tooth.castShadow = true;
+      g.add(tooth);
+    }
+    g.position.set(def.x, def.y, 0);
+    g.scale.set(0.001, 0.001, 0.001);
+    group.add(g);
+    return g;
+  }
+  GEAR_DEFS.forEach((def) => gearMeshes.push({ mesh: mkGear(def), def, active: false, spin: 0 }));
+
+  let vel = 0.5, dragging = false, px = 0;
+  const el = renderer.domElement;
+  el.style.cursor = "grab";
+  el.addEventListener("pointerdown", (e) => {
+    dragging = true; px = e.clientX; el.style.cursor = "grabbing";
+    try { el.setPointerCapture(e.pointerId); } catch (er) {}
+  });
+  el.addEventListener("pointermove", (e) => { if (!dragging) return; vel += (e.clientX - px) * 0.012; px = e.clientX; });
+  el.addEventListener("pointerup", () => { dragging = false; el.style.cursor = "grab"; vib(10); });
+  window.addEventListener("resize", () => {
+    const w = host.clientWidth, h = host.clientHeight;
+    if (!w || !h) return;
+    renderer.setSize(w, h);
+    camera.aspect = w / h;
+    camera.updateProjectionMatrix();
+  });
+
+  let allDoneGlow = 0;
+  function loop() {
+    requestAnimationFrame(loop);
+    vel = Math.max(-8, Math.min(8, vel));
+    vel += (0.5 - vel) * 0.004;
+    gearMeshes.forEach((gm, i) => {
+      if (!gm.active) return;
+      const ratio = GEAR_DEFS[0].r / gm.def.r;
+      const dir = i % 2 === 0 ? 1 : -1;
+      gm.spin += vel * 0.016 * ratio * dir;
+      gm.mesh.rotation.z = gm.spin;
+      if (gm.mesh.scale.x < 1) {
+        gm.mesh.scale.x = gm.mesh.scale.y = gm.mesh.scale.z = Math.min(1, gm.mesh.scale.x + 0.045);
+      }
+    });
+    if (GH.allDone) {
+      allDoneGlow += 0.02;
+      rimA.intensity = 1.0 + Math.sin(allDoneGlow) * 0.5;
+      rimB.color.setHex(0xffd64f);
+    }
+    group.rotation.y = Math.sin(performance.now() * 0.00018) * 0.14;
+    const w = host.clientWidth, h = host.clientHeight;
+    if (w > 0 && h > 0 && isFinite(group.rotation.y)) {
+      renderer.render(scene, camera);
+    }
+  }
+  requestAnimationFrame(loop);
+  GH = { fake: false, gearMeshes, allDone: false, setCount(n) { gearMeshes.forEach((gm, i) => { gm.active = i < n; if (!gm.active) gm.mesh.scale.set(0.001, 0.001, 0.001); }); } };
+  return GH;
+}
+function renderGearHero(cleared) {
+  const n = gearHeroCountFor(cleared);
+  const pct = Math.round((n / 8) * 100);
+  const titleEl = $("gearTitle"), subEl = $("gearSub"), barEl = $("gearBar");
+  if (titleEl) titleEl.textContent = n >= 8 ? "⚡ 発明準備完了!!" : "発明チャージ " + pct + "%";
+  if (subEl) subEl.textContent = "（歯車 " + n + "/8）";
+  if (barEl) barEl.style.width = pct + "%";
+  const gh = ensureGearHero();
+  if (!gh || gh.fake) return;
+  gh.allDone = n >= 8;
+  gh.setCount(n);
+}
+
+/* ================================================================
+   3Dリアル工場ステージ（FORGE共通エンジン）
+================================================================ */
+const FLOOR_Y = -1.18;
+let ST = null;
+
+function brushedTexOf() {
+  const cv = document.createElement("canvas");
+  cv.width = 512; cv.height = 512;
+  const ctx = cv.getContext("2d");
+  ctx.fillStyle = "#9a9a9a"; ctx.fillRect(0, 0, 512, 512);
+  for (let i = 0; i < 2600; i++) {
+    const y = Math.random() * 512, x = Math.random() * 512;
+    const len = 30 + Math.random() * 220;
+    ctx.strokeStyle = Math.random() < 0.5
+      ? "rgba(255,255,255," + (0.03 + Math.random() * 0.06) + ")"
+      : "rgba(0,0,0," + (0.03 + Math.random() * 0.06) + ")";
+    ctx.lineWidth = 0.5 + Math.random();
+    ctx.beginPath(); ctx.moveTo(x, y); ctx.lineTo(x + len, y + (Math.random() - 0.5) * 2); ctx.stroke();
+  }
+  const tex = new THREE.CanvasTexture(cv);
+  tex.wrapS = tex.wrapT = THREE.RepeatWrapping;
+  return tex;
+}
+function tableTexOf() {
+  const cv = document.createElement("canvas");
+  cv.width = 512; cv.height = 512;
+  const ctx = cv.getContext("2d");
+  ctx.fillStyle = "#767b83"; ctx.fillRect(0, 0, 512, 512);
+  for (let i = 0; i < 2600; i++) {
+    const g = 100 + Math.random() * 50 | 0;
+    ctx.fillStyle = "rgba(" + g + "," + (g + 2) + "," + (g + 6) + "," + (0.10 + Math.random() * 0.15) + ")";
+    ctx.fillRect(Math.random() * 512, Math.random() * 512, 1 + Math.random() * 3, 1 + Math.random() * 2);
+  }
+  for (let ix = 0; ix < 8; ix++) for (let iy = 0; iy < 8; iy++) {
+    const x = 32 + ix * 64, y = 32 + iy * 64;
+    ctx.fillStyle = "#101317";
+    ctx.beginPath(); ctx.arc(x, y, 13, 0, 6.29); ctx.fill();
+    ctx.strokeStyle = "rgba(255,255,255,0.25)";
+    ctx.lineWidth = 2;
+    ctx.beginPath(); ctx.arc(x, y, 14.5, Math.PI * 0.7, Math.PI * 1.6); ctx.stroke();
+    ctx.strokeStyle = "rgba(0,0,0,0.5)";
+    ctx.beginPath(); ctx.arc(x, y, 14.5, Math.PI * 1.7, Math.PI * 2.55); ctx.stroke();
+  }
+  const tex = new THREE.CanvasTexture(cv);
+  tex.wrapS = tex.wrapT = THREE.RepeatWrapping;
+  tex.repeat.set(2, 1.5);
+  return tex;
+}
+
+function ensureStage() {
+  if (ST) { ST.resize(); return; }
+  const host = $("stage3d");
+  if (typeof THREE === "undefined") {
+    host.insertAdjacentHTML("beforeend", '<div style="color:#8fa6bd;font-size:12px;text-align:center;padding-top:100px">3D表示にはネット接続が必要です</div>');
+    ST = { fake: true, resize(){}, clearScene(){}, group: null };
+    return;
+  }
+  const renderer = new THREE.WebGLRenderer({ antialias: true });
+  renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 3));
+  renderer.outputEncoding = THREE.sRGBEncoding;
+  renderer.toneMapping = THREE.ACESFilmicToneMapping;
+  renderer.toneMappingExposure = 1.05;
+  renderer.shadowMap.enabled = true;
+  renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+  host.insertBefore(renderer.domElement, host.firstChild);
+
+  const scene = new THREE.Scene();
+  scene.background = new THREE.Color(0x14171d);
+  scene.fog = new THREE.Fog(0x14171d, 8, 16);
+  const camera = new THREE.PerspectiveCamera(33, 1, 0.1, 60);
+  camera.position.set(0, 0.9, 5.6);
+  camera.lookAt(0, -0.15, 0);
+
+  const texLoader = new THREE.TextureLoader();
+  const steelTex = {};
+  [["col", "assets/steel_col.jpg", true], ["rough", "assets/steel_rough.jpg", false], ["nrm", "assets/steel_nrm.jpg", false]].forEach((it) => {
+    texLoader.load(it[1], (t) => {
+      t.wrapS = t.wrapT = THREE.RepeatWrapping;
+      if (it[2]) t.encoding = THREE.sRGBEncoding;
+      steelTex[it[0]] = t;
+    });
+  });
+
+  (function makeEnv() {
+    const es = new THREE.Scene();
+    const box = new THREE.BoxGeometry(1, 1, 1);
+    function panel(x, y, z, sx, sy, color) {
+      const m = new THREE.Mesh(box, new THREE.MeshBasicMaterial({ color }));
+      m.position.set(x, y, z); m.scale.set(sx, sy, 0.1); m.lookAt(0, 0, 0); es.add(m);
+    }
+    es.add(new THREE.Mesh(new THREE.SphereGeometry(20, 8, 8), new THREE.MeshBasicMaterial({ color: 0x14161a, side: THREE.BackSide })));
+    panel(0, 6, 1, 7, 3.5, 0xffffff);
+    panel(-6, 2, 2, 2, 4, 0x9fb4c8);
+    panel(6, 1.5, -1, 1.5, 4, 0xcdbfa8);
+    panel(0, 0.8, 6, 5, 2.2, 0x6f7a86);
+    const pmrem = new THREE.PMREMGenerator(renderer);
+    scene.environment = pmrem.fromScene(es, 0.02).texture;
+  })();
+  try {
+    if (THREE.RGBELoader) {
+      new THREE.RGBELoader().load("assets/env.hdr", (hdr) => {
+        const pm = new THREE.PMREMGenerator(renderer);
+        scene.environment = pm.fromEquirectangular(hdr).texture;
+        hdr.dispose();
+        pm.dispose();
+      });
+    }
+  } catch (e) {}
+
+  const isMobile = /Android|iPhone|iPad/i.test(navigator.userAgent);
+  scene.add(new THREE.HemisphereLight(0xbfd0e0, 0x201f2b, 0.35));
+  const key = new THREE.DirectionalLight(0xf0f4ff, 1.05);
+  key.position.set(3, 5, 2.5);
+  key.castShadow = true;
+  key.shadow.mapSize.set(isMobile ? 1024 : 2048, isMobile ? 1024 : 2048);
+  key.shadow.camera.left = -3.5; key.shadow.camera.right = 3.5;
+  key.shadow.camera.top = 3.5; key.shadow.camera.bottom = -3.5;
+  key.shadow.bias = -0.0004;
+  scene.add(key);
+  const rim = new THREE.PointLight(0x7fb8ff, 0.24, 16); rim.position.set(-3.4, 1.6, -2.6); scene.add(rim);
+
+  const group = new THREE.Group();
+  scene.add(group);
+
+  const floor = new THREE.Mesh(
+    new THREE.BoxGeometry(7, 0.35, 5),
+    new THREE.MeshStandardMaterial({ map: tableTexOf(), metalness: 0.72, roughness: 0.5, envMapIntensity: 1.1 })
+  );
+  floor.material.bumpMap = floor.material.map;
+  floor.material.bumpScale = 0.03;
+  floor.position.y = FLOOR_Y - 0.175;
+  floor.receiveShadow = true;
+  floor.userData.keep = true;
+  group.add(floor);
+
+  const blobCv = document.createElement("canvas");
+  blobCv.width = 256; blobCv.height = 256;
+  (function () {
+    const c2 = blobCv.getContext("2d");
+    const g = c2.createRadialGradient(128, 128, 10, 128, 128, 125);
+    g.addColorStop(0, "rgba(0,0,0,0.55)");
+    g.addColorStop(1, "rgba(0,0,0,0)");
+    c2.fillStyle = g;
+    c2.fillRect(0, 0, 256, 256);
+  })();
+  const blob = new THREE.Mesh(
+    new THREE.PlaneGeometry(4.4, 2.8),
+    new THREE.MeshBasicMaterial({ map: new THREE.CanvasTexture(blobCv), transparent: true, opacity: 0.5, depthWrite: false })
+  );
+  blob.rotation.x = -Math.PI / 2;
+  blob.position.y = FLOOR_Y + 0.002;
+  blob.userData.keep = true;
+  group.add(blob);
+
+  const brush = brushedTexOf();
+
+  let rotY = -0.5, rotX = 0.12, zT = 5.6, dragging = false, touched = false, px = 0, py = 0;
+  let mode = "orbit", startX = 0, startY = 0, startLoad = 0, downTime = 0, movedPx = 0;
+  const ray = new THREE.Raycaster();
+  const ndc = new THREE.Vector2();
+  const el = renderer.domElement;
+
+  function hitProxy(e) {
+    const sc = ST.sceneApi;
+    if (!sc || !sc.proxy) return false;
+    const r = el.getBoundingClientRect();
+    ndc.x = ((e.clientX - r.left) / r.width) * 2 - 1;
+    ndc.y = -((e.clientY - r.top) / r.height) * 2 + 1;
+    camera.updateMatrixWorld();
+    group.updateMatrixWorld(true);
+    ray.setFromCamera(ndc, camera);
+    const list = Array.isArray(sc.proxy) ? sc.proxy : [sc.proxy];
+    return ray.intersectObjects(list, false).length > 0;
+  }
+  el.addEventListener("pointerdown", (e) => {
+    touched = true;
+    $("btnToReveal").disabled = false;
+    if (ST.broken) { rebuildScene(); return; }
+    dragging = true; px = e.clientX; py = e.clientY;
+    downTime = performance.now(); movedPx = 0;
+    ST.springing = false;
+    if (hitProxy(e)) {
+      mode = "pull";
+      startX = e.clientX; startY = e.clientY;
+      startLoad = +$("loadRange").value;
+      el.style.cursor = "grabbing";
+    } else mode = "orbit";
+    try { el.setPointerCapture(e.pointerId); } catch (err) {}
+  });
+  el.addEventListener("pointermove", (e) => {
+    if (!dragging) return;
+    movedPx += Math.abs(e.clientX - px) + Math.abs(e.clientY - py);
+    const sc = ST.sceneApi;
+    if (mode === "pull" && sc) {
+      let dv = 0;
+      if (sc.grabAxis === "x") dv = (e.clientX - startX) / Math.max(1, el.clientWidth) * 170;
+      else if (sc.grabAxis === "y") dv = (e.clientY - startY) / Math.max(1, el.clientHeight) * 220;
+      else dv = (Math.abs(e.clientX - startX) + Math.abs(e.clientY - startY)) / Math.max(1, el.clientWidth) * 150;
+      $("loadRange").value = Math.max(0, Math.min(100, startLoad + dv));
+      onLoadInput();
+    } else {
+      rotY += (e.clientX - px) * 0.011;
+      rotX = Math.max(-0.5, Math.min(0.95, rotX + (e.clientY - py) * 0.008));
+    }
+    px = e.clientX; py = e.clientY;
+  });
+  el.addEventListener("pointerup", () => {
+    if (!dragging) return;
+    dragging = false;
+    el.style.cursor = "grab";
+    const sc = ST.sceneApi;
+    if (mode === "pull" && sc) {
+      if (performance.now() - downTime < 220 && movedPx < 10 && sc.poke) sc.poke();
+      if (!ST.broken && sc.springBack) ST.springing = true;
+      mode = "orbit";
+    }
+  });
+  el.addEventListener("wheel", (e) => {
+    e.preventDefault();
+    zT = Math.max(3.0, Math.min(8.5, zT + e.deltaY * 0.004));
+  }, { passive: false });
+
+  function resize() {
+    const w = host.clientWidth, h = host.clientHeight;
+    if (!w || !h) return;
+    renderer.setSize(w, h);
+    camera.aspect = w / h;
+    camera.updateProjectionMatrix();
+  }
+  window.addEventListener("resize", resize);
+  resize();
+
+  /* 📐図面の目：正面→上→横スナップ（2.5秒毎）＋方眼オーバーレイ＋3周で自動復帰 */
+  let bpActive = false, bpStep = 0, bpTimer = null, bpCycles = 0;
+  const BP_VIEWS = [
+    { ry: 0, rx: 0.02, z: 5.4, label: "正面図" },
+    { ry: 0, rx: 1.52, z: 5.4, label: "平面図" },
+    { ry: 1.5708, rx: 0.02, z: 5.4, label: "側面図" }
+  ];
+  function bpStop() {
+    bpActive = false;
+    if (bpTimer) { clearTimeout(bpTimer); bpTimer = null; }
+    const ov = $("blueov"), vc = $("viewchip"), hint = $("hint3d");
+    if (ov) ov.classList.remove("on");
+    if (vc) vc.classList.remove("on");
+    if (hint) hint.style.opacity = "";
+  }
+  function bpAdvance() {
+    if (!bpActive) return;
+    const v = BP_VIEWS[bpStep % 3];
+    rotY = v.ry; rotX = v.rx; zT = v.z; touched = true;
+    const vc = $("viewchip");
+    if (vc) { vc.textContent = "📐 " + v.label; vc.classList.add("on"); }
+    bpStep++;
+    if (bpStep % 3 === 0) {
+      bpCycles++;
+      if (bpCycles >= 3) { bpTimer = setTimeout(bpStop, 2500); return; }
+    }
+    bpTimer = setTimeout(bpAdvance, 2500);
+  }
+  function bpToggle() {
+    if (bpActive) { bpStop(); return; }
+    bpActive = true; bpStep = 0; bpCycles = 0;
+    const ov = $("blueov"), hint = $("hint3d");
+    if (ov) ov.classList.add("on");
+    if (hint) hint.style.opacity = "0"; /* 図面の目とヒントの重なりを避ける */
+    bpAdvance();
+  }
+
+  ST = {
+    group, camera, brush, steel: steelTex,
+    sceneApi: null, broken: false, springing: false, timeScale: 1, shake: 0,
+    resize,
+    resetView() { rotY = -0.5; rotX = 0.12; zT = 5.6; touched = false; bpStop(); },
+    setView(ry, rx, z) {
+      if (ry !== undefined) rotY = ry;
+      if (rx !== undefined) rotX = rx;
+      if (z !== undefined) zT = z;
+      touched = true;
+    },
+    toggleBlueprint: bpToggle,
+    stopBlueprint: bpStop,
+    clearScene() {
+      for (let i = group.children.length - 1; i >= 0; i--) {
+        const c = group.children[i];
+        if (c.userData && c.userData.keep) continue;
+        group.remove(c);
+        c.traverse && c.traverse((o) => {
+          if (o.geometry) o.geometry.dispose();
+          if (o.material && o.material !== null) (Array.isArray(o.material) ? o.material : [o.material]).forEach((m) => { if (m.dispose) m.dispose(); });
+        });
+      }
+      ST.sceneApi = null; ST.broken = false; ST.springing = false; ST.timeScale = 1; ST.shake = 0;
+      $("stageChips").innerHTML = "";
+      bpStop();
+      setBoom(false, "");
+    },
+    breakFX(label) {
+      ST.broken = true; ST.timeScale = 0.18; ST.shake = 0.06;
+      progress.broken = (progress.broken || 0) + 1;
+      saveProgress();
+      vib([90, 40, 140]);
+      const flash = $("flash");
+      flash.style.transition = "none"; flash.style.opacity = 0.65;
+      requestAnimationFrame(() => { flash.style.transition = "opacity 0.45s"; flash.style.opacity = 0; });
+      setBoom(true, label || "バキッ!!");
+    }
+  };
+
+  let last = performance.now();
+  function loop(now) {
+    requestAnimationFrame(loop);
+    let dt = Math.min(0.05, (now - last) / 1000); last = now;
+    ST.timeScale += (1 - ST.timeScale) * 0.03;
+    dt *= ST.timeScale;
+    if (!touched) rotY += 0.002;
+    group.rotation.y += (rotY - group.rotation.y) * 0.12;
+    group.rotation.x += (rotX - group.rotation.x) * 0.12;
+    camera.position.z += (zT - camera.position.z) * 0.09;
+
+    if (ST.springing && !ST.broken) {
+      const v = +$("loadRange").value;
+      const nv = v * 0.85 - 1.2;
+      if (nv <= 0) { $("loadRange").value = 0; ST.springing = false; } else $("loadRange").value = nv;
+      onLoadInput();
+    }
+    const sc = ST.sceneApi;
+    if (sc && sc.tick) sc.tick(dt, now);
+
+    ST.shake = Math.max(0, ST.shake - dt * 0.14);
+    group.position.x = (Math.random() - 0.5) * ST.shake;
+    group.position.y = (Math.random() - 0.5) * ST.shake;
+    if (isFinite(group.rotation.x) && isFinite(group.rotation.y) && isFinite(camera.position.z)) {
+      renderer.render(scene, camera);
+    }
+  }
+  requestAnimationFrame(loop);
+}
+
+function setBoom(on, label) {
+  $("boom").className = on ? "boom show" : "boom";
+  if (label) $("boomText").textContent = label;
+}
+
+/* ---- 共通部品メーカー ---- */
+function steelMaps(extra) {
+  const s = ST.steel;
+  const base = (s && s.col)
+    ? { color: 0xd8dde2, metalness: 0.9, roughness: 1.0,
+        map: s.col, roughnessMap: s.rough, normalMap: s.nrm,
+        normalScale: new THREE.Vector2(0.6, 0.6), envMapIntensity: 1.25 }
+    : { color: 0xb8c2cc, metalness: 0.85, roughness: 0.36,
+        roughnessMap: ST.brush, bumpMap: ST.brush, bumpScale: 0.012, envMapIntensity: 1.2 };
+  return Object.assign(base, extra || {});
+}
+function steelMatOf(extra) {
+  return new THREE.MeshStandardMaterial(steelMaps(extra));
+}
+function brassMatOf(extra) {
+  return new THREE.MeshStandardMaterial(Object.assign({ color: 0xc9a86a, metalness: 0.85, roughness: 0.32, envMapIntensity: 1.2 }, extra || {}));
+}
+const tmpC2 = { c: null };
+function tc() { if (!tmpC2.c) tmpC2.c = new THREE.Color(); return tmpC2.c; }
+function setExtraHTML(html) { $("extraCtrls").innerHTML = html || ""; }
+function setChips(html) { $("stageChips").innerHTML = html || ""; }
+
+/* ================================================================
+   実験シーン（L1〜L6）
+================================================================ */
+
+/* L1：困りごと→リフター（てこ＋ネジジャッキ）で箱が持ち上がる */
+function buildL1() {
+  const floor2 = new THREE.Mesh(new THREE.CylinderGeometry(0.62, 0.68, 0.1, 24), steelMatOf({ color: 0x4a525d }));
+  floor2.position.y = -0.85;
+  floor2.castShadow = true;
+  ST.group.add(floor2);
+  const screw = new THREE.Mesh(new THREE.CylinderGeometry(0.11, 0.11, 1.0, 16), brassMatOf({}));
+  screw.position.set(0, -0.55, 0);
+  screw.castShadow = true;
+  ST.group.add(screw);
+  const threadMat = new THREE.MeshStandardMaterial({ color: 0xffe9a3, emissive: 0xb08030, emissiveIntensity: 0.25, metalness: 0.6, roughness: 0.4 });
+  const threads = [];
+  for (let i = 0; i < 8; i++) {
+    const th = new THREE.Mesh(new THREE.TorusGeometry(0.12, 0.012, 6, 16), threadMat);
+    th.rotation.x = Math.PI / 2;
+    th.position.set(0, -1.0 + i * 0.12, 0);
+    ST.group.add(th);
+    threads.push(th);
+  }
+  const platform = new THREE.Mesh(new THREE.CylinderGeometry(0.34, 0.34, 0.07, 20), steelMatOf({ color: 0x8a94a0 }));
+  platform.castShadow = true;
+  ST.group.add(platform);
+  const box = new THREE.Mesh(new THREE.BoxGeometry(0.62, 0.5, 0.62), new THREE.MeshStandardMaterial({ color: 0xb87f4a, metalness: 0.1, roughness: 0.85 }));
+  box.castShadow = true;
+  ST.group.add(box);
+  const leverArm = new THREE.Mesh(new THREE.BoxGeometry(1.3, 0.07, 0.09), steelMatOf({ color: 0x6a7480 }));
+  leverArm.position.set(0.75, -0.35, 0.55);
+  leverArm.castShadow = true;
+  ST.group.add(leverArm);
+  const fulcrum = new THREE.Mesh(new THREE.ConeGeometry(0.09, 0.22, 16), steelMatOf({ color: 0x4a525d }));
+  fulcrum.position.set(0.75, -0.46, 0.55);
+  ST.group.add(fulcrum);
+  setChips('<div class="chip" id="csChip" style="left:14%; top:14%">工程0%：困りごと「10cm持ち上げたい」</div>');
+  ST.setView(-0.4, 0.16, 4.8);
+  const proxy = new THREE.Mesh(new THREE.BoxGeometry(2.4, 1.8, 1.6), new THREE.MeshBasicMaterial({ visible: false }));
+  proxy.position.y = -0.4;
+  ST.group.add(proxy);
+  setExtraHTML('<div class="readout" id="l1read"></div>');
+  let load = 0;
+  function apply() {
+    const k = load;
+    const lift = k * 1.0;
+    platform.position.y = -0.97 + lift;
+    box.position.y = platform.position.y + 0.28;
+    threads.forEach((t2, i) => { t2.visible = i < Math.round(k * 7) + 1; t2.rotation.z = k * 6; });
+    leverArm.rotation.z = -k * 0.35;
+    leverArm.position.y = -0.35 - k * 0.06;
+    const chip = $("csChip");
+    const r = $("l1read");
+    if (chip) chip.textContent = k < 0.05 ? "工程0%：困りごと「10cm持ち上げたい」" : k < 0.98 ? "工程" + Math.round(k * 100) + "%：てこ＋ネジで少しずつ上がる" : "完成!! 困りごとが装置になった🎉";
+    if (r) r.innerHTML = "持ち上げ高さ ＝ <b>" + Math.round(k * 10) + "cm</b>";
+  }
+  apply();
+  ST.sceneApi = { proxy, grabAxis: "x", springBack: false, update(l) { load = l; apply(); } };
+}
+
+/* L2：図面＝3つの窓（第三角法・投影） */
+function buildL2() {
+  const sh = new THREE.Shape();
+  [[-0.55, -0.45], [0.55, -0.45], [0.55, -0.25], [-0.25, -0.25], [-0.25, 0.5], [-0.55, 0.5]].forEach((p, i) => {
+    if (i === 0) sh.moveTo(p[0], p[1]); else sh.lineTo(p[0], p[1]);
+  });
+  const geo = new THREE.ExtrudeGeometry(sh, { depth: 0.5, bevelEnabled: true, bevelThickness: 0.02, bevelSize: 0.02, bevelSegments: 2 });
+  geo.translate(0, 0, -0.25);
+  const part = new THREE.Mesh(geo, steelMatOf({ color: 0x9fb0c4 }));
+  part.castShadow = true;
+  ST.group.add(part);
+  function gridTex() {
+    const cv = document.createElement("canvas");
+    cv.width = cv.height = 256;
+    const c = cv.getContext("2d");
+    c.fillStyle = "#0e1826";
+    c.fillRect(0, 0, 256, 256);
+    c.strokeStyle = "rgba(127,184,255,0.28)";
+    for (let i = 0; i <= 256; i += 32) {
+      c.beginPath(); c.moveTo(i, 0); c.lineTo(i, 256); c.stroke();
+      c.beginPath(); c.moveTo(0, i); c.lineTo(256, i); c.stroke();
+    }
+    return new THREE.CanvasTexture(cv);
+  }
+  const winMat = new THREE.MeshStandardMaterial({ map: gridTex(), metalness: 0.1, roughness: 0.9, transparent: true, opacity: 0.85 });
+  const wBack = new THREE.Mesh(new THREE.PlaneGeometry(2.2, 1.9), winMat);
+  wBack.position.set(0, 0.25, -1.3);
+  const wBot = new THREE.Mesh(new THREE.PlaneGeometry(2.2, 1.9), winMat.clone());
+  wBot.rotation.x = -Math.PI / 2;
+  wBot.position.set(0, -1.0, 0);
+  const wSide = new THREE.Mesh(new THREE.PlaneGeometry(1.9, 1.9), winMat.clone());
+  wSide.rotation.y = -Math.PI / 2;
+  wSide.position.set(1.5, 0.25, 0);
+  ST.group.add(wBack); ST.group.add(wBot); ST.group.add(wSide);
+  const silBack = new THREE.MeshBasicMaterial({ color: 0x2a4a78 });
+  const silBot = new THREE.MeshBasicMaterial({ color: 0x2a4a78 });
+  const silSide = new THREE.MeshBasicMaterial({ color: 0x2a4a78 });
+  const sBack = new THREE.Mesh(geo, silBack); sBack.position.set(0, 0.25, -1.28);
+  const sBot = new THREE.Mesh(geo, silBot); sBot.position.set(0, -0.98, 0);
+  const sSide = new THREE.Mesh(geo, silSide); sSide.position.set(1.48, 0.25, 0);
+  ST.group.add(sBack); ST.group.add(sBot); ST.group.add(sSide);
+  setChips('<div class="chip" id="csChip" style="left:8%; top:14%">回転＝スライダー／窓の影に注目</div>' +
+           '<div class="chip" style="right:6%; top:70%">100%で3面図に展開</div>');
+  ST.setView(0.5, 0.05, 5.2);
+  const proxy = new THREE.Mesh(new THREE.BoxGeometry(2.0, 1.8, 1.4), new THREE.MeshBasicMaterial({ visible: false }));
+  ST.group.add(proxy);
+  setExtraHTML('<div class="readout" id="l2read"></div>');
+  let load = 0;
+  function apply() {
+    const rot = load < 0.85 ? load / 0.85 * Math.PI * 0.9 : Math.PI * 0.9;
+    part.rotation.y = rot;
+    sBack.rotation.copy(part.rotation); sBack.scale.set(1, 1, 0.012);
+    sBot.rotation.copy(part.rotation); sBot.scale.set(1, 0.012, 1);
+    sSide.rotation.copy(part.rotation); sSide.scale.set(0.012, 1, 1);
+    const expand = load > 0.85 ? (load - 0.85) / 0.15 : 0;
+    wBack.position.z = -1.3 - expand * 0.6;
+    wSide.position.x = 1.5 + expand * 0.6;
+    sBack.position.z = -1.28 - expand * 0.6;
+    sSide.position.x = 1.48 + expand * 0.6;
+    const chip = $("csChip");
+    const r = $("l2read");
+    if (chip) chip.textContent = expand > 0.9 ? "3面図に展開！これで形が確定する" : "回転＝スライダー／窓の影に注目";
+    if (r) r.innerHTML = "回転 <b>" + Math.round(rot * 180 / Math.PI) + "°</b> ／ 3つの窓が同時に変わる";
+  }
+  apply();
+  ST.sceneApi = { proxy, grabAxis: "x", springBack: false, update(l) { load = l; apply(); } };
+}
+
+/* L3：寸法公差（丸棒5本のばらつき→合格/不合格） */
+function buildL3() {
+  const gaugeMat = steelMatOf({ color: 0x4a525d });
+  const rods = [];
+  const errs = [0.02, -0.01, 0.05, -0.03, 0.008];
+  for (let i = 0; i < 5; i++) {
+    const rod = new THREE.Mesh(new THREE.CylinderGeometry(0.11, 0.11, 1.2, 20), steelMatOf({}));
+    rod.rotation.z = Math.PI / 2;
+    rod.position.set(-1.6 + i * 0.8, 0.3, 0);
+    rod.castShadow = true;
+    ST.group.add(rod);
+    rods.push({ mesh: rod, err: errs[i], baseX: -1.6 + i * 0.8, ok: true });
+  }
+  const gaugeL = new THREE.Mesh(new THREE.BoxGeometry(0.05, 0.6, 0.6), gaugeMat);
+  gaugeL.position.set(-2.05, -0.15, 0);
+  ST.group.add(gaugeL);
+  const gaugeR = new THREE.Mesh(new THREE.BoxGeometry(0.05, 0.6, 0.6), gaugeMat);
+  gaugeR.position.set(2.05, -0.15, 0);
+  ST.group.add(gaugeR);
+  setChips('<div class="chip" id="csChip" style="left:8%; top:12%">「10」だけ指示された丸棒5本</div>');
+  ST.setView(-0.15, 0.1, 5.6);
+  const proxy = new THREE.Mesh(new THREE.BoxGeometry(3.6, 1.4, 1.0), new THREE.MeshBasicMaterial({ visible: false }));
+  proxy.position.y = 0.1;
+  ST.group.add(proxy);
+  setExtraHTML('<div class="readout" id="l3read"></div>');
+  let load = 0;
+  const okMat = new THREE.MeshStandardMaterial(steelMaps({ emissive: 0x1a6a3a, emissiveIntensity: 0.25 }));
+  const ngMat = new THREE.MeshStandardMaterial({ color: 0xb03028, emissive: 0xff3020, emissiveIntensity: 0.35, metalness: 0.7, roughness: 0.4 });
+  function apply() {
+    const tol = 0.5 - load * 0.49;
+    rods.forEach((r) => {
+      const ok = Math.abs(r.err) <= tol;
+      r.ok = ok;
+      r.mesh.material = ok ? okMat : ngMat;
+      r.mesh.position.x = r.baseX + (ok ? 0 : Math.sin(performance.now() * 0.02 + r.baseX) * 0.02);
+      r.mesh.position.y = ok ? 0.3 : 0.3 - 0.35;
+    });
+    const chip = $("csChip");
+    const r2 = $("l3read");
+    const okCount = rods.filter((r) => r.ok).length;
+    if (chip) chip.textContent = "公差帯 ±" + tol.toFixed(3) + "（10±" + tol.toFixed(3) + "）";
+    if (r2) r2.innerHTML = "合格 <b>" + okCount + "/5本</b> ／ 実測 10.02 / 9.99 / 10.05 / 9.97 / 10.01";
+  }
+  apply();
+  ST.sceneApi = { proxy, grabAxis: "x", springBack: false, update(l) { load = l; apply(); } };
+}
+
+/* L4：はめあい（穴ブロックに軸挿入・すきま/中間/しまり） */
+function buildL4() {
+  const block = new THREE.Mesh(new THREE.BoxGeometry(1.3, 1.0, 1.3), steelMatOf({ color: 0x8a94a0 }));
+  block.position.set(0.55, -0.2, 0);
+  block.castShadow = true;
+  ST.group.add(block);
+  const holeMat = new THREE.MeshStandardMaterial({ color: 0x14171d, side: THREE.DoubleSide });
+  const holeRing = new THREE.Mesh(new THREE.TorusGeometry(0.32, 0.03, 10, 24), holeMat);
+  holeRing.position.set(-0.1, -0.2, 0);
+  holeRing.rotation.y = Math.PI / 2;
+  ST.group.add(holeRing);
+  const shaft = new THREE.Mesh(new THREE.CylinderGeometry(0.3, 0.3, 1.9, 24), brassMatOf({}));
+  shaft.rotation.z = Math.PI / 2;
+  shaft.castShadow = true;
+  ST.group.add(shaft);
+  setChips('<div class="chip" id="csChip" style="left:10%; top:14%">モード：すきまばめ</div>');
+  ST.setView(-0.3, 0.2, 5.2);
+  const proxy = new THREE.Mesh(new THREE.BoxGeometry(2.6, 1.4, 1.6), new THREE.MeshBasicMaterial({ visible: false }));
+  proxy.position.set(0.2, -0.2, 0);
+  ST.group.add(proxy);
+  setExtraHTML('<div class="readout" id="l4read"></div>');
+  let load = 0, spin = 0, press = 0;
+  function apply() {
+    const mode = load < 0.34 ? 0 : load < 0.67 ? 1 : 2;
+    const startX = -1.7, endX = -0.1 + press;
+    const progress2 = mode === 0 ? Math.min(1, load / 0.33) : mode === 1 ? Math.min(1, (load - 0.34) / 0.33) : Math.min(1, (load - 0.67) / 0.33);
+    shaft.position.x = startX + (endX - startX) * progress2;
+    const chip = $("csChip");
+    const r = $("l4read");
+    if (mode === 0) {
+      spin += 0.14;
+      shaft.rotation.x = spin;
+      if (chip) chip.textContent = "モード：すきまばめ（H7/g6系）";
+      if (r) r.innerHTML = "スッと入って<b>回る</b>＝すきまばめ";
+    } else if (mode === 1) {
+      shaft.rotation.x = 0;
+      if (chip) chip.textContent = "モード：中間ばめ";
+      if (r) r.innerHTML = "軽く叩いて入る＝<b>ぴったり止まる</b>（中間ばめ）";
+    } else {
+      shaft.rotation.x = 0;
+      if (chip) chip.textContent = "モード：しまりばめ（プレス圧入）";
+      if (r) r.innerHTML = "プレスでぐっと圧入＝<b>一体化して回らない</b>（しまりばめ）";
+    }
+  }
+  apply();
+  ST.sceneApi = { proxy, grabAxis: "x", springBack: false, update(l) { load = l; apply(); }, tick() { if (load < 0.34) apply(); } };
+}
+
+/* L5：ネジ（斜面の魔法・締付け張力・振動緩み・対策トグル） */
+function buildL5() {
+  const plateTop = new THREE.Mesh(new THREE.BoxGeometry(1.6, 0.14, 1.0), steelMatOf({ color: 0x8a94a0 }));
+  plateTop.position.y = 0.15;
+  plateTop.castShadow = true;
+  ST.group.add(plateTop);
+  const plateBot = new THREE.Mesh(new THREE.BoxGeometry(1.6, 0.14, 1.0), steelMatOf({ color: 0x8a94a0 }));
+  plateBot.position.y = -0.45;
+  plateBot.castShadow = true;
+  ST.group.add(plateBot);
+  const boltMat = new THREE.MeshStandardMaterial(steelMaps({ color: 0xb8c2cc }));
+  const shaft = new THREE.Mesh(new THREE.CylinderGeometry(0.09, 0.09, 0.85, 18), boltMat);
+  shaft.castShadow = true;
+  ST.group.add(shaft);
+  const head = new THREE.Mesh(new THREE.CylinderGeometry(0.17, 0.17, 0.12, 6), boltMat);
+  head.position.y = 0.62;
+  ST.group.add(head);
+  const nut = new THREE.Mesh(new THREE.CylinderGeometry(0.17, 0.17, 0.13, 6), boltMat);
+  nut.position.y = -0.62;
+  ST.group.add(nut);
+  const washer = new THREE.Mesh(new THREE.TorusGeometry(0.15, 0.025, 8, 20), steelMatOf({ color: 0xffd64f }));
+  washer.rotation.x = Math.PI / 2;
+  washer.position.y = -0.53;
+  washer.visible = false;
+  ST.group.add(washer);
+  const nut2 = new THREE.Mesh(new THREE.CylinderGeometry(0.17, 0.17, 0.13, 6), boltMat);
+  nut2.position.y = -0.76;
+  nut2.visible = false;
+  ST.group.add(nut2);
+  setChips('<div class="chip" id="csChip" style="left:10%; top:12%">締付け前</div>');
+  ST.setView(-0.35, 0.18, 4.6);
+  const proxy = new THREE.Mesh(new THREE.BoxGeometry(2.0, 1.6, 1.4), new THREE.MeshBasicMaterial({ visible: false }));
+  ST.group.add(proxy);
+  setExtraHTML(
+    '<div class="readout" id="l5read"></div>' +
+    '<div style="display:flex;gap:8px;margin-top:8px">' +
+    '<button class="opt" id="l5wash" style="margin-top:0;padding:9px;font-size:12.5px;text-align:center">ばね座金 OFF</button>' +
+    '<button class="opt" id="l5dbl" style="margin-top:0;padding:9px;font-size:12.5px;text-align:center">ダブルナット OFF</button>' +
+    '</div>'
+  );
+  let load = 0, useWasher = false, useDouble = false, rotAngle = 0;
+  const nutBase = -0.62;
+  function apply() {
+    const tighten = Math.min(1, load / 0.6);
+    const stretch = tighten * 0.05;
+    shaft.scale.y = 1 + stretch;
+    shaft.position.y = 0.08 - stretch * 0.4;
+    head.position.y = 0.62;
+    boltMat.emissive = boltMat.emissive || new THREE.Color();
+    boltMat.emissiveIntensity = tighten * 0.5;
+    boltMat.emissive.setRGB(tighten * 0.5, tighten * 0.08, 0.02);
+    washer.visible = useWasher;
+    nut2.visible = useDouble;
+    const chip = $("csChip");
+    const r = $("l5read");
+    if (load <= 0.6) {
+      rotAngle = 0;
+      nut.rotation.y = 0;
+      nut.position.y = nutBase + stretch * 0.02;
+      if (chip) chip.textContent = tighten > 0.95 ? "締付け完了（軸が伸びて噛んでいる）" : "締付け中…" + Math.round(tighten * 100) + "%";
+      if (r) r.innerHTML = "軸の伸び ＝ <b>" + (stretch * 100).toFixed(1) + "%</b>（見えない張力）";
+    } else {
+      const held = useWasher || useDouble;
+      if (held) nut.rotation.y = 0;
+      if (chip) chip.textContent = held ? "振動中…だが緩まない（保険が効いている）" : "振動中…ナットがじわじわ回り戻る⚠️";
+      if (r) r.innerHTML = held ? "対策あり＝<b>保険の重ねがけ</b>で緩まない" : "対策なし＝<b>緩んでいく</b>（振動でナットが滑る）";
+    }
+  }
+  apply();
+  $("l5wash").addEventListener("click", () => { useWasher = !useWasher; $("l5wash").textContent = "ばね座金 " + (useWasher ? "ON" : "OFF"); apply(); });
+  $("l5dbl").addEventListener("click", () => { useDouble = !useDouble; $("l5dbl").textContent = "ダブルナット " + (useDouble ? "ON" : "OFF"); apply(); });
+  ST.sceneApi = {
+    proxy, grabAxis: "x", springBack: false,
+    update(l) { if (ST.broken) return; load = l; apply(); },
+    poke() {
+      if (!ST.broken) return;
+      rebuildScene();
+    },
+    tick(dt) {
+      if (ST.broken || load <= 0.6) return;
+      const held = useWasher || useDouble;
+      if (held) return;
+      const vib2 = (load - 0.6) / 0.4;
+      rotAngle += vib2 * dt * 2.6;
+      nut.rotation.y = rotAngle;
+      const stretch = 0.05;
+      nut.position.y = nutBase + stretch * 0.02 + rotAngle * 0.008;
+      if (rotAngle > 1.2 && !ST.broken) {
+        ST.breakFX("プツン!! ボルトが首の下でちぎれた");
+      }
+    }
+  };
+}
+
+/* L6：機械要素の組み上げ（軸→軸受→歯車→キー→回転） */
+function buildL6() {
+  const shaft = new THREE.Mesh(new THREE.CylinderGeometry(0.11, 0.11, 2.6, 20), steelMatOf({}));
+  shaft.rotation.z = Math.PI / 2;
+  shaft.castShadow = true;
+  ST.group.add(shaft);
+  function mkBearing(x) {
+    const g = new THREE.Group();
+    const outer = new THREE.Mesh(new THREE.TorusGeometry(0.26, 0.09, 10, 24), steelMatOf({ color: 0x6a7480 }));
+    const inner = new THREE.Mesh(new THREE.TorusGeometry(0.15, 0.05, 8, 20), steelMatOf({ color: 0x8a94a0 }));
+    g.add(outer); g.add(inner);
+    g.rotation.y = Math.PI / 2;
+    g.position.x = x;
+    g.visible = false;
+    ST.group.add(g);
+    return g;
+  }
+  const bearL = mkBearing(-0.85), bearR = mkBearing(0.85);
+  const gear = new THREE.Group();
+  const disk = new THREE.Mesh(new THREE.CylinderGeometry(0.42, 0.42, 0.18, 32), steelMatOf({ color: 0x9fb0c4 }));
+  disk.rotation.z = Math.PI / 2;
+  gear.add(disk);
+  for (let i = 0; i < 14; i++) {
+    const a = i / 14 * Math.PI * 2;
+    const tooth = new THREE.Mesh(new THREE.BoxGeometry(0.18, 0.1, 0.09), steelMatOf({ color: 0x9fb0c4 }));
+    tooth.position.set(0, Math.cos(a) * 0.46, Math.sin(a) * 0.46);
+    tooth.rotation.x = a;
+    gear.add(tooth);
+  }
+  gear.visible = false;
+  ST.group.add(gear);
+  const key = new THREE.Mesh(new THREE.BoxGeometry(0.14, 0.05, 0.05), steelMatOf({ color: 0xffd64f }));
+  key.position.set(0, 0.13, 0);
+  key.visible = false;
+  ST.group.add(key);
+  setChips('<div class="chip" id="csChip" style="left:10%; top:12%">工程0%：軸だけ</div>');
+  ST.setView(-0.35, 0.2, 5.4);
+  const proxy = new THREE.Mesh(new THREE.BoxGeometry(2.6, 1.2, 1.2), new THREE.MeshBasicMaterial({ visible: false }));
+  ST.group.add(proxy);
+  setExtraHTML('<div class="readout" id="l6read"></div>');
+  let load = 0, spin = 0;
+  const STEPS = ["軸だけ", "軸受2個を装着（支える）", "歯車を装着（伝える）", "キーを装着（空回り止め）→回転！"];
+  function apply() {
+    const stage = Math.min(3, Math.floor(load / 0.25));
+    bearL.visible = stage >= 1; bearR.visible = stage >= 1;
+    gear.visible = stage >= 2;
+    key.visible = stage >= 3;
+    const chip = $("csChip");
+    const r = $("l6read");
+    if (chip) chip.textContent = "工程" + Math.round(load * 100) + "%：" + STEPS[stage];
+    if (r) r.innerHTML = stage >= 3 ? "全部そろって<b>トルクが軸→歯車へ伝わる</b>" : "組み上げ中…（" + (stage + 1) + "/4）";
+  }
+  apply();
+  ST.sceneApi = {
+    proxy, grabAxis: "x", springBack: false,
+    update(l) { load = l; apply(); },
+    tick(dt) { if (load >= 0.999) { spin += dt * 2.2; shaft.rotation.x = spin; gear.rotation.x = spin; key.rotation.x = spin; key.position.set(0, Math.cos(spin) * 0.13, Math.sin(spin) * 0.13); } }
+  };
+}
+
+const BUILDERS = { l1: buildL1, l2: buildL2, l3: buildL3, l4: buildL4, l5: buildL5, l6: buildL6 };
+
+/* ================================================================
+   🎬 カード専用3D（説明1枚＝専用アニメ1本、全18本）
+================================================================ */
+const CARD_SCENES = {
+  /* ===== L1 機械設計ってなに？ ===== */
+  l1: [
+    // ①困りごと→翻訳（吹き出し「持ち上げたい」→図面ロールが開く）
+    function () {
+      const roll = new THREE.Mesh(new THREE.CylinderGeometry(0.16, 0.16, 1.3, 20), new THREE.MeshStandardMaterial({ color: 0xeef4fa, metalness: 0.0, roughness: 0.9 }));
+      roll.rotation.z = Math.PI / 2;
+      roll.castShadow = true;
+      ST.group.add(roll);
+      const linesMat = new THREE.MeshStandardMaterial({ color: 0x7fb8ff, emissive: 0x2a5a9a, emissiveIntensity: 0.5 });
+      const lines = [];
+      for (let i = 0; i < 4; i++) {
+        const ln = new THREE.Mesh(new THREE.BoxGeometry(0.5, 0.02, 0.02), linesMat);
+        ln.position.set(0.2, 0.3 - i * 0.12, 0);
+        ln.visible = false;
+        ST.group.add(ln);
+        lines.push(ln);
+      }
+      const bulb = new THREE.Mesh(new THREE.SphereGeometry(0.14, 16, 12), new THREE.MeshStandardMaterial({ color: 0xffe9a3, emissive: 0xffcf60, emissiveIntensity: 1.2 }));
+      bulb.position.set(-0.55, 0.3, 0);
+      ST.group.add(bulb);
+      setChips('<div class="chip" id="csChip" style="left:12%; top:16%">困りごと 💡「持ち上げたい」</div>');
+      ST.setView(-0.3, 0.15, 3.9);
+      let t2 = 0;
+      ST.sceneApi = { tick(dt) {
+        t2 += dt;
+        const cycle = t2 % 4.5;
+        const c = $("csChip");
+        bulb.material.emissiveIntensity = 1.0 + Math.sin(t2 * 3) * 0.3;
+        const n = Math.min(4, Math.floor(Math.max(0, cycle - 1.2) / 0.5));
+        lines.forEach((ln, i) => (ln.visible = i < n));
+        if (c) c.textContent = cycle < 1.2 ? "困りごと 💡「持ち上げたい」" : n < 4 ? "図面に翻訳中…" : "翻訳完了：形になった📜";
+      } };
+    },
+    // ②図面という言語（三角スケール＋ペンが線を引く）
+    function () {
+      const board = new THREE.Mesh(new THREE.BoxGeometry(1.8, 0.06, 1.2), new THREE.MeshStandardMaterial({ color: 0xeef4fa, roughness: 0.85 }));
+      board.position.y = -0.4;
+      board.castShadow = true;
+      ST.group.add(board);
+      const lineMat = new THREE.MeshStandardMaterial({ color: 0x14171d, roughness: 0.5 });
+      const segs = [];
+      const pts = [[-0.7, -0.35], [0.4, -0.35], [0.4, -0.15], [-0.2, -0.15], [-0.2, 0.3], [-0.7, 0.3]];
+      for (let i = 0; i < pts.length - 1; i++) {
+        const p = pts[i], n = pts[i + 1];
+        const dx = n[0] - p[0], dz = n[1] - p[1];
+        const l = Math.hypot(dx, dz);
+        const m = new THREE.Mesh(new THREE.BoxGeometry(l, 0.02, 0.025), lineMat);
+        m.position.set((p[0] + n[0]) / 2, -0.365, (p[1] + n[1]) / 2);
+        m.rotation.y = -Math.atan2(dz, dx);
+        m.visible = false;
+        ST.group.add(m);
+        segs.push(m);
+      }
+      const pen = new THREE.Mesh(new THREE.ConeGeometry(0.03, 0.18, 10), steelMatOf({ color: 0xffd64f }));
+      pen.rotation.x = Math.PI;
+      ST.group.add(pen);
+      setChips('<div class="chip" style="left:16%; top:16%">図面＝誰でも作れる共通言語</div>');
+      ST.setView(-0.2, 0.55, 3.7);
+      let t2 = 0;
+      ST.sceneApi = { tick(dt) {
+        t2 += dt * 0.5;
+        if (t2 > 1) t2 = 0;
+        const idx = Math.min(segs.length - 1, Math.floor(t2 * segs.length));
+        segs.forEach((s, i) => (s.visible = i <= idx));
+        const p = pts[Math.min(pts.length - 1, idx + 1)];
+        pen.position.set(p[0], -0.28, p[1]);
+      } };
+    },
+    // ③答え合わせの目（機械のカバー越しに中身が透けて見える）
+    function () {
+      const cover = new THREE.Mesh(new THREE.BoxGeometry(1.3, 1.0, 1.0), new THREE.MeshStandardMaterial({ color: 0x9fb0c4, metalness: 0.6, roughness: 0.4, transparent: true, opacity: 0.85 }));
+      cover.castShadow = true;
+      ST.group.add(cover);
+      const gearIn = new THREE.Mesh(new THREE.CylinderGeometry(0.32, 0.32, 0.14, 14), steelMatOf({ color: 0xffd64f }));
+      gearIn.rotation.x = Math.PI / 2;
+      ST.group.add(gearIn);
+      const eye = new THREE.Mesh(new THREE.RingGeometry(0.35, 0.44, 24), new THREE.MeshBasicMaterial({ color: 0x7fb8ff, transparent: true, opacity: 0 }));
+      eye.position.z = 0.7;
+      ST.group.add(eye);
+      setChips('<div class="chip" id="csChip" style="left:14%; top:14%">明日から「答え合わせの目」</div>');
+      ST.setView(-0.3, 0.2, 3.8);
+      let t2 = 0;
+      ST.sceneApi = { tick(dt) {
+        t2 += dt;
+        const cycle = t2 % 4;
+        const k = cycle < 2 ? cycle / 2 : Math.max(0, 1 - (cycle - 2) / 1.5);
+        cover.material.opacity = 0.85 - k * 0.65;
+        gearIn.rotation.z += dt * 1.5;
+        const c = $("csChip");
+        if (c) c.textContent = k > 0.6 ? "中身が「これ、あの困りごとの答えだ」" : "明日から「答え合わせの目」";
+      } };
+    }
+  ],
+
+  /* ===== L2 図面＝3つの窓 ===== */
+  l2: [
+    // ①3つの窓の紹介（3枚のガラス窓が立つ）
+    function () {
+      function gridTex(col) {
+        const cv = document.createElement("canvas");
+        cv.width = cv.height = 128;
+        const c = cv.getContext("2d");
+        c.fillStyle = "#0e1826"; c.fillRect(0, 0, 128, 128);
+        c.strokeStyle = col || "rgba(127,184,255,0.3)";
+        for (let i = 0; i <= 128; i += 16) { c.beginPath(); c.moveTo(i, 0); c.lineTo(i, 128); c.stroke(); c.beginPath(); c.moveTo(0, i); c.lineTo(128, i); c.stroke(); }
+        return new THREE.CanvasTexture(cv);
+      }
+      const mat1 = new THREE.MeshStandardMaterial({ map: gridTex("rgba(127,184,255,0.35)"), transparent: true, opacity: 0.8 });
+      const mat2 = new THREE.MeshStandardMaterial({ map: gridTex("rgba(255,214,79,0.35)"), transparent: true, opacity: 0.8 });
+      const mat3 = new THREE.MeshStandardMaterial({ map: gridTex("rgba(62,240,160,0.35)"), transparent: true, opacity: 0.8 });
+      const wF = new THREE.Mesh(new THREE.PlaneGeometry(1.0, 0.9), mat1); wF.position.set(-0.9, 0.1, 0.3);
+      const wT = new THREE.Mesh(new THREE.PlaneGeometry(1.0, 0.9), mat2); wT.rotation.x = -Math.PI / 2; wT.position.set(0.15, -0.35, 0.3);
+      const wS = new THREE.Mesh(new THREE.PlaneGeometry(0.9, 0.9), mat3); wS.rotation.y = -Math.PI / 2; wS.position.set(0.7, 0.1, -0.15);
+      ST.group.add(wF); ST.group.add(wT); ST.group.add(wS);
+      setChips('<div class="chip" style="left:6%; top:10%">正面の窓</div>' +
+               '<div class="chip" style="left:36%; top:70%">上の窓</div>' +
+               '<div class="chip" style="right:6%; top:30%">横の窓</div>');
+      ST.setView(-0.5, 0.35, 4.1);
+      let t2 = 0;
+      ST.sceneApi = { tick(dt) { t2 += dt; [mat1, mat2, mat3].forEach((m, i) => { m.opacity = 0.65 + 0.2 * Math.sin(t2 * 2 + i); }); } };
+    },
+    // ②1枚では嘘がつける（同じ影・違う形の比較）
+    function () {
+      const silMat = new THREE.MeshBasicMaterial({ color: 0x2a4a78 });
+      const win = new THREE.Mesh(new THREE.PlaneGeometry(1.6, 1.4), new THREE.MeshStandardMaterial({ color: 0x0e1826, transparent: true, opacity: 0.5 }));
+      win.position.z = -0.6;
+      ST.group.add(win);
+      const cyl = new THREE.Mesh(new THREE.CylinderGeometry(0.3, 0.3, 0.9, 20), steelMatOf({ color: 0x9fb0c4 }));
+      cyl.rotation.z = Math.PI / 2;
+      cyl.position.set(-0.55, 0, 0);
+      cyl.castShadow = true;
+      ST.group.add(cyl);
+      const box = new THREE.Mesh(new THREE.BoxGeometry(0.6, 0.6, 0.6), steelMatOf({ color: 0x9fb0c4 }));
+      box.position.set(0.55, 0, 0);
+      box.castShadow = true;
+      ST.group.add(box);
+      const silC = new THREE.Mesh(new THREE.CircleGeometry(0.3, 24), silMat);
+      silC.position.set(-0.55, 0, -0.58);
+      const silB = new THREE.Mesh(new THREE.PlaneGeometry(0.6, 0.6), silMat.clone());
+      silB.position.set(0.55, 0, -0.58);
+      ST.group.add(silC); ST.group.add(silB);
+      setChips('<div class="chip red" style="left:10%; top:12%">円柱も四角柱も…</div>' +
+               '<div class="chip red" style="left:10%; top:76%">正面から見ると同じ丸影！</div>');
+      ST.setView(0, 0.05, 3.9);
+      ST.sceneApi = { tick(dt) {} };
+    },
+    // ③第三角法のルール（JIS配置：正面→右に側面、上に平面）
+    function () {
+      function gridTex() {
+        const cv = document.createElement("canvas");
+        cv.width = cv.height = 128;
+        const c = cv.getContext("2d");
+        c.fillStyle = "#0e1826"; c.fillRect(0, 0, 128, 128);
+        c.strokeStyle = "rgba(127,184,255,0.3)";
+        for (let i = 0; i <= 128; i += 16) { c.beginPath(); c.moveTo(i, 0); c.lineTo(i, 128); c.stroke(); c.beginPath(); c.moveTo(0, i); c.lineTo(128, i); c.stroke(); }
+        return new THREE.CanvasTexture(cv);
+      }
+      const planeMat = () => new THREE.MeshStandardMaterial({ map: gridTex(), transparent: true, opacity: 0.85 });
+      const pF = new THREE.Mesh(new THREE.PlaneGeometry(0.9, 0.7), planeMat()); pF.position.set(-0.5, 0, 0);
+      const pS = new THREE.Mesh(new THREE.PlaneGeometry(0.7, 0.7), planeMat()); pS.position.set(0.5, 0, 0);
+      const pT = new THREE.Mesh(new THREE.PlaneGeometry(0.9, 0.7), planeMat()); pT.rotation.x = -Math.PI / 2; pT.position.set(-0.5, 0.55, -0.35);
+      ST.group.add(pF); ST.group.add(pS); ST.group.add(pT);
+      const jisMat = new THREE.MeshStandardMaterial({ color: 0xffd64f, emissive: 0xb08030, emissiveIntensity: 0.6 });
+      const badge = new THREE.Mesh(new THREE.TorusGeometry(0.1, 0.02, 8, 20), jisMat);
+      badge.position.set(0, -0.55, 0.3);
+      ST.group.add(badge);
+      setChips('<div class="chip" style="left:8%; top:20%">正面図</div>' +
+               '<div class="chip" style="right:10%; top:20%">→右に側面図</div>' +
+               '<div class="chip" style="left:8%; top:66%">↑上に平面図</div>' +
+               '<div class="chip" style="left:36%; top:88%">JIS＝第三角法</div>');
+      ST.setView(-0.35, 0.25, 4.3);
+      let t2 = 0;
+      ST.sceneApi = { tick(dt) { t2 += dt; badge.rotation.z += dt * 1.5; } };
+    }
+  ],
+
+  /* ===== L3 寸法公差（ぴったりは無い） ===== */
+  l3: [
+    // ①世界にぴったりは無い（同じ指示の棒が微妙に違う長さで並ぶ）
+    function () {
+      const rods = [];
+      const errs = [0.0, 0.03, -0.02, 0.015, -0.035];
+      for (let i = 0; i < 5; i++) {
+        const rod = new THREE.Mesh(new THREE.CylinderGeometry(0.08, 0.08, 1.0 + errs[i], 16), steelMatOf({}));
+        rod.rotation.z = Math.PI / 2;
+        rod.position.set(-1.4 + i * 0.7, (i - 2) * 0.02, 0);
+        rod.castShadow = true;
+        ST.group.add(rod);
+        rods.push(rod);
+      }
+      setChips('<div class="chip" style="left:12%; top:14%">同じ「10」指示なのに全部微妙に違う</div>');
+      ST.setView(-0.15, 0.12, 5.0);
+      let t2 = 0;
+      ST.sceneApi = { tick(dt) { t2 += dt; rods.forEach((r, i) => { r.position.y = (i - 2) * 0.02 + Math.sin(t2 * 1.5 + i) * 0.01; }); } };
+    },
+    // ②公差＝許すばらつきの幅（帯グラフに測定値が落ちる）
+    function () {
+      const bandMat = new THREE.MeshStandardMaterial({ color: 0x3ef0a0, emissive: 0x1a6a3a, emissiveIntensity: 0.3, transparent: true, opacity: 0.35 });
+      const band = new THREE.Mesh(new THREE.BoxGeometry(1.6, 0.5, 0.5), bandMat);
+      ST.group.add(band);
+      const dots = [];
+      const vals = [0.1, -0.15, 0.3, -0.05, 0.2, -0.28];
+      vals.forEach((v) => {
+        const dot = new THREE.Mesh(new THREE.SphereGeometry(0.06, 12, 10), new THREE.MeshStandardMaterial({ color: 0x7fb8ff, emissive: 0x2a5a9a, emissiveIntensity: 0.5 }));
+        dot.position.set(v * 1.6, 1.4, 0);
+        ST.group.add(dot);
+        dots.push({ mesh: dot, targetY: Math.abs(v) <= 0.25 ? 0 : -0.9, falling: true, vy: 0 });
+      });
+      setChips('<div class="chip" style="left:10%; top:12%">帯の中＝合格／外＝不合格</div>');
+      ST.setView(-0.1, 0.05, 4.6);
+      let t2 = 0;
+      ST.sceneApi = { tick(dt) {
+        t2 += dt;
+        const cycle = t2 % 3.5;
+        if (cycle < 0.1) dots.forEach((d, i) => { d.mesh.position.y = 1.4; d.vy = 0; });
+        dots.forEach((d) => {
+          if (d.mesh.position.y > d.targetY) {
+            d.vy += dt * 2.5;
+            d.mesh.position.y -= d.vy * dt * 3;
+            if (d.mesh.position.y <= d.targetY) d.mesh.position.y = d.targetY;
+          }
+        });
+      } };
+    },
+    // ③きつい公差はお金と時間（±0.01の棒に値札が跳ね上がる）
+    function () {
+      const rod = new THREE.Mesh(new THREE.CylinderGeometry(0.14, 0.14, 1.2, 20), steelMatOf({}));
+      rod.rotation.z = Math.PI / 2;
+      rod.castShadow = true;
+      ST.group.add(rod);
+      const priceMat = new THREE.MeshStandardMaterial({ color: 0xff5d4d, emissive: 0xb02818, emissiveIntensity: 0.6 });
+      const priceBar = new THREE.Mesh(new THREE.BoxGeometry(0.18, 0.1, 0.18), priceMat);
+      priceBar.position.set(0.9, -0.6, 0);
+      ST.group.add(priceBar);
+      setChips('<div class="chip" id="csChip" style="left:10%; top:14%">公差 ±0.5（普通）</div>');
+      ST.setView(-0.2, 0.15, 4.4);
+      let t2 = 0;
+      ST.sceneApi = { tick(dt) {
+        t2 += dt;
+        const cycle = t2 % 4;
+        const k = Math.min(1, cycle / 3);
+        priceBar.scale.y = 1 + k * 9;
+        priceBar.position.y = -0.6 + (k * 9 * 0.1) / 2;
+        priceBar.material.emissiveIntensity = 0.4 + k * 1.2;
+        const c = $("csChip");
+        if (c) c.textContent = k < 0.3 ? "公差 ±0.5（普通）" : k < 0.8 ? "公差を絞る…コストが上がる" : "公差 ±0.01＝別世界の値段💸";
+      } };
+    }
+  ],
+
+  /* ===== L4 はめあい（穴と軸の関係） ===== */
+  l4: [
+    // ①関係の設計（穴と軸が向き合う）
+    function () {
+      const holeBlock = new THREE.Mesh(new THREE.BoxGeometry(0.9, 0.9, 0.5), steelMatOf({ color: 0x8a94a0 }));
+      holeBlock.position.x = -0.5;
+      holeBlock.castShadow = true;
+      ST.group.add(holeBlock);
+      const holeRing = new THREE.Mesh(new THREE.TorusGeometry(0.24, 0.02, 10, 24), new THREE.MeshStandardMaterial({ color: 0x14171d }));
+      holeRing.position.set(-0.24, 0, 0);
+      holeRing.rotation.y = Math.PI / 2;
+      ST.group.add(holeRing);
+      const shaft = new THREE.Mesh(new THREE.CylinderGeometry(0.22, 0.22, 0.9, 20), brassMatOf({}));
+      shaft.rotation.z = Math.PI / 2;
+      shaft.position.x = 0.6;
+      shaft.castShadow = true;
+      ST.group.add(shaft);
+      setChips('<div class="chip" style="left:10%; top:14%">穴と軸＝2つで1つの関係</div>');
+      ST.setView(-0.3, 0.2, 4.2);
+      let t2 = 0;
+      ST.sceneApi = { tick(dt) { t2 += dt; shaft.position.x = 0.35 + Math.sin(t2 * 1.2) * 0.25; } };
+    },
+    // ②すきま⇔しまりの対比（回るvs一体化）
+    function () {
+      const holeMat = new THREE.MeshStandardMaterial({ color: 0x14171d });
+      const blockA = new THREE.Mesh(new THREE.BoxGeometry(0.7, 0.7, 0.5), steelMatOf({ color: 0x8a94a0 }));
+      blockA.position.set(-0.7, 0.35, 0);
+      ST.group.add(blockA);
+      const ringA = new THREE.Mesh(new THREE.TorusGeometry(0.2, 0.018, 8, 20), holeMat);
+      ringA.rotation.y = Math.PI / 2; ringA.position.set(-0.45, 0.35, 0);
+      ST.group.add(ringA);
+      const shaftA = new THREE.Mesh(new THREE.CylinderGeometry(0.17, 0.17, 0.55, 18), brassMatOf({}));
+      shaftA.rotation.z = Math.PI / 2; shaftA.position.set(-0.45, 0.35, 0);
+      ST.group.add(shaftA);
+      const blockB = new THREE.Mesh(new THREE.BoxGeometry(0.7, 0.7, 0.5), steelMatOf({ color: 0x8a94a0 }));
+      blockB.position.set(-0.7, -0.55, 0);
+      ST.group.add(blockB);
+      const ringB = new THREE.Mesh(new THREE.TorusGeometry(0.2, 0.018, 8, 20), holeMat);
+      ringB.rotation.y = Math.PI / 2; ringB.position.set(-0.45, -0.55, 0);
+      ST.group.add(ringB);
+      const shaftB = new THREE.Mesh(new THREE.CylinderGeometry(0.2, 0.2, 0.55, 18), brassMatOf({}));
+      shaftB.rotation.z = Math.PI / 2; shaftB.position.set(-0.45, -0.55, 0);
+      ST.group.add(shaftB);
+      setChips('<div class="chip" style="right:6%; top:16%">上＝すきま：回る🔄</div>' +
+               '<div class="chip red" style="right:6%; top:66%">下＝しまり：一体化🔒</div>');
+      ST.setView(-0.1, 0.1, 4.0);
+      let t2 = 0;
+      ST.sceneApi = { tick(dt) { t2 += dt; shaftA.rotation.x += dt * 3; } };
+    },
+    // ③H7/g6という暗号（記号がスタンプされる）
+    function () {
+      const shaft = new THREE.Mesh(new THREE.CylinderGeometry(0.24, 0.24, 1.1, 24), brassMatOf({}));
+      shaft.rotation.z = Math.PI / 2;
+      shaft.castShadow = true;
+      ST.group.add(shaft);
+      setChips('<div class="chip" id="csChip" style="left:16%; top:16%">記号がスタンプされる…</div>');
+      ST.setView(-0.25, 0.2, 3.7);
+      let t2 = 0;
+      ST.sceneApi = { tick(dt) {
+        t2 += dt;
+        const cycle = t2 % 3;
+        const c = $("csChip");
+        if (c) c.textContent = cycle < 1.5 ? "記号がスタンプされる…" : "H7 / g6 ＝ 穴と軸の関係の暗号";
+        shaft.rotation.x += dt * 0.6;
+      } };
+    }
+  ],
+
+  /* ===== L5 ネジ（斜面の魔法と緩みの正体） ===== */
+  l5: [
+    // ①斜面を巻いた道具（三角の斜面が柱に巻き付いてねじ山になる）
+    function () {
+      const post = new THREE.Mesh(new THREE.CylinderGeometry(0.22, 0.22, 1.3, 24), steelMatOf({ color: 0x8a94a0 }));
+      post.castShadow = true;
+      ST.group.add(post);
+      const rampMat = new THREE.MeshStandardMaterial({ color: 0xffd64f, emissive: 0xb08030, emissiveIntensity: 0.4, side: THREE.DoubleSide });
+      const rampShape = new THREE.Shape();
+      rampShape.moveTo(0, 0); rampShape.lineTo(0.55, 0); rampShape.lineTo(0, 0.16); rampShape.closePath();
+      const rampGeo = new THREE.ExtrudeGeometry(rampShape, { depth: 0.06, bevelEnabled: false });
+      const ramp = new THREE.Mesh(rampGeo, rampMat);
+      ramp.position.set(0.22, -0.65, 0);
+      ST.group.add(ramp);
+      setChips('<div class="chip" id="csChip" style="left:12%; top:14%">斜面（黄）が柱に巻き付く</div>');
+      ST.setView(-0.3, 0.15, 3.6);
+      let t2 = 0;
+      ST.sceneApi = { tick(dt) {
+        t2 += dt * 0.4;
+        const cycle = t2 % 1.2;
+        const ang = cycle / 1.2 * Math.PI * 2 * 3;
+        ramp.position.y = -0.65 + (cycle / 1.2) * 1.2;
+        ramp.rotation.y = ang;
+        const c = $("csChip");
+        if (c) c.textContent = "斜面（黄）が柱に巻き付く＝これがねじ山";
+      } };
+    },
+    // ②締付けの正体（ボルトが伸びて赤く光る）
+    function () {
+      const bolt = new THREE.Mesh(new THREE.CylinderGeometry(0.13, 0.13, 1.0, 20), steelMatOf({}));
+      bolt.castShadow = true;
+      ST.group.add(bolt);
+      const head = new THREE.Mesh(new THREE.CylinderGeometry(0.22, 0.22, 0.14, 6), steelMatOf({ color: 0x8a94a0 }));
+      head.position.y = 0.57;
+      ST.group.add(head);
+      setChips('<div class="chip" id="csChip" style="left:12%; top:14%">締めると伸びる…</div>');
+      ST.setView(-0.2, 0.1, 3.4);
+      let t2 = 0;
+      ST.sceneApi = { tick(dt) {
+        t2 += dt;
+        const cycle = t2 % 3.5;
+        const k = cycle < 2 ? Math.min(1, cycle / 1.7) : 1;
+        bolt.scale.y = 1 + k * 0.08;
+        bolt.material.emissive = bolt.material.emissive || new THREE.Color();
+        bolt.material.emissive.setRGB(k * 0.6, k * 0.06, 0);
+        bolt.material.emissiveIntensity = 0.7;
+        const c = $("csChip");
+        if (c) c.textContent = k > 0.9 ? "伸びた戻り力＝噛みつく力（軸力）" : "締めると伸びる…";
+      } };
+    },
+    // ③保険の重ねがけ（座金＋ロック剤＋ダブルナットが順に付く）
+    function () {
+      const bolt = new THREE.Mesh(new THREE.CylinderGeometry(0.11, 0.11, 1.1, 18), steelMatOf({}));
+      ST.group.add(bolt);
+      const washer = new THREE.Mesh(new THREE.TorusGeometry(0.17, 0.025, 8, 20), steelMatOf({ color: 0xffd64f }));
+      washer.rotation.x = Math.PI / 2;
+      washer.position.y = -0.4;
+      washer.visible = false;
+      ST.group.add(washer);
+      const lockDrop = new THREE.Mesh(new THREE.SphereGeometry(0.08, 12, 10), new THREE.MeshStandardMaterial({ color: 0x7fe0ff, emissive: 0x2ea8ff, emissiveIntensity: 0.6, transparent: true, opacity: 0.8 }));
+      lockDrop.position.y = -0.3;
+      lockDrop.visible = false;
+      ST.group.add(lockDrop);
+      const nut2 = new THREE.Mesh(new THREE.CylinderGeometry(0.19, 0.19, 0.13, 6), steelMatOf({ color: 0x8a94a0 }));
+      nut2.position.y = -0.65;
+      nut2.visible = false;
+      ST.group.add(nut2);
+      setChips('<div class="chip" id="csChip" style="left:10%; top:14%">保険①ばね座金</div>');
+      ST.setView(-0.25, 0.1, 3.4);
+      let t2 = 0;
+      ST.sceneApi = { tick(dt) {
+        t2 += dt;
+        const cycle = t2 % 4.5;
+        const c = $("csChip");
+        if (cycle < 1.5) { washer.visible = true; lockDrop.visible = false; nut2.visible = false; if (c) c.textContent = "保険①ばね座金"; }
+        else if (cycle < 3.0) { lockDrop.visible = true; lockDrop.position.y = -0.3 - ((cycle - 1.5) / 1.5) * 0.1; if (c) c.textContent = "保険②ロック剤（接着）"; }
+        else { nut2.visible = true; if (c) c.textContent = "保険③ダブルナット＝重ねがけ完成"; }
+      } };
+    }
+  ],
+
+  /* ===== L6 機械要素の顔ぶれ（設計のレゴ） ===== */
+  l6: [
+    // ①設計のレゴブロック（軸・軸受・歯車・ばねが浮いて並ぶ）
+    function () {
+      const parts = [];
+      const shaft = new THREE.Mesh(new THREE.CylinderGeometry(0.09, 0.09, 0.7, 16), steelMatOf({}));
+      shaft.rotation.z = Math.PI / 2; shaft.position.set(-0.9, 0.4, 0);
+      ST.group.add(shaft); parts.push(shaft);
+      const bearing = new THREE.Mesh(new THREE.TorusGeometry(0.18, 0.06, 10, 20), steelMatOf({ color: 0x8a94a0 }));
+      bearing.position.set(-0.3, 0.4, 0);
+      ST.group.add(bearing); parts.push(bearing);
+      const gear = new THREE.Mesh(new THREE.CylinderGeometry(0.2, 0.2, 0.1, 12), steelMatOf({ color: 0x9fb0c4 }));
+      gear.rotation.x = Math.PI / 2; gear.position.set(0.35, 0.4, 0);
+      ST.group.add(gear); parts.push(gear);
+      const springMat = new THREE.MeshStandardMaterial({ color: 0xffd64f, emissive: 0xb08030, emissiveIntensity: 0.3 });
+      const spring = new THREE.Mesh(new THREE.TorusGeometry(0.12, 0.025, 8, 16), springMat);
+      spring.position.set(0.95, 0.4, 0);
+      ST.group.add(spring); parts.push(spring);
+      setChips('<div class="chip" style="left:10%; top:70%">軸・軸受・歯車・ばね＝設計のレゴ</div>');
+      ST.setView(-0.2, 0.15, 4.4);
+      let t2 = 0;
+      ST.sceneApi = { tick(dt) { t2 += dt; parts.forEach((p, i) => { p.position.y = 0.4 + Math.sin(t2 * 1.4 + i) * 0.06; }); } };
+    },
+    // ②選ぶ時代（カタログ本から部品が浮かび上がる）
+    function () {
+      const book = new THREE.Mesh(new THREE.BoxGeometry(0.9, 0.08, 1.2), new THREE.MeshStandardMaterial({ color: 0xeef4fa, roughness: 0.85 }));
+      book.position.y = -0.5;
+      book.castShadow = true;
+      ST.group.add(book);
+      const part = new THREE.Mesh(new THREE.TorusGeometry(0.18, 0.06, 10, 20), steelMatOf({ color: 0x8a94a0 }));
+      ST.group.add(part);
+      setChips('<div class="chip" id="csChip" style="left:12%; top:14%">カタログから選ぶ＝現代の設計</div>');
+      ST.setView(-0.2, 0.35, 3.6);
+      let t2 = 0;
+      ST.sceneApi = { tick(dt) {
+        t2 += dt;
+        const cycle = t2 % 3;
+        const k = cycle < 2 ? Math.min(1, cycle / 1.6) : 1;
+        part.position.y = -0.42 + k * 0.55;
+        part.rotation.x += dt * 1.2;
+        const c = $("csChip");
+        if (c) c.textContent = k > 0.9 ? "自作しない。正しく選ぶ力が設計力" : "カタログから選ぶ＝現代の設計";
+      } };
+    },
+    // ③キーの空回り止め（キーが無いと歯車が空転、有ると伝わる）
+    function () {
+      const shaft = new THREE.Mesh(new THREE.CylinderGeometry(0.16, 0.16, 1.1, 20), steelMatOf({}));
+      shaft.rotation.z = Math.PI / 2;
+      shaft.castShadow = true;
+      ST.group.add(shaft);
+      const gear = new THREE.Mesh(new THREE.CylinderGeometry(0.32, 0.32, 0.2, 14), steelMatOf({ color: 0x9fb0c4 }));
+      gear.rotation.z = Math.PI / 2;
+      ST.group.add(gear);
+      const key = new THREE.Mesh(new THREE.BoxGeometry(0.2, 0.06, 0.06), steelMatOf({ color: 0xffd64f }));
+      key.visible = false;
+      ST.group.add(key);
+      setChips('<div class="chip" id="csChip" style="left:10%; top:14%">キー無し：軸だけ回って歯車は空転…</div>');
+      ST.setView(-0.25, 0.15, 3.6);
+      let t2 = 0, shaftSpin = 0, gearSpin = 0;
+      ST.sceneApi = { tick(dt) {
+        t2 += dt;
+        const cycle = t2 % 5;
+        const hasKey = cycle > 2.5;
+        key.visible = hasKey;
+        shaftSpin += dt * 2.5;
+        shaft.rotation.x = shaftSpin;
+        if (hasKey) { gearSpin = shaftSpin; key.position.set(0, Math.cos(shaftSpin) * 0.16, Math.sin(shaftSpin) * 0.16); }
+        else { gearSpin += dt * 0.05; }
+        gear.rotation.z = shaft.rotation.z;
+        gear.rotation.x = gearSpin;
+        const c = $("csChip");
+        if (c) c.textContent = hasKey ? "キーあり：軸と歯車が一体で回る🔧" : "キー無し：軸だけ回って歯車は空転…";
+      } };
+    }
+  ]
+};
+function buildCardScene(id, i) {
+  if (!ST || ST.fake) return;
+  ST.clearScene();
+  ST.resetView();
+  const f = CARD_SCENES[id] && CARD_SCENES[id][i];
+  if (f) f(); else BUILDERS[id]();
+  requestAnimationFrame(() => ST.resize());
+}
+
+/* ================================================================
+   レッスンの流れ
+================================================================ */
+let curIdx = 0, cur = null, missionPick = -1, cardIdx = 0;
+
+function openLesson(i) {
+  curIdx = i;
+  cur = LESSONS[i];
+  missionPick = -1;
+  showView("viewLesson");
+  $("lsTag").textContent = cur.tag;
+  $("lsTitle").textContent = cur.title;
+  $("msNo").innerHTML = cur.mission.no;
+  $("msQ").innerHTML = cur.mission.q;
+  const wrap = $("msOpts");
+  wrap.innerHTML = "";
+  cur.mission.opts.forEach((o, idx) => {
+    const b = document.createElement("button");
+    b.className = "opt";
+    b.textContent = (idx + 1) + ". " + o;
+    b.addEventListener("click", () => { missionPick = idx; startExp(); });
+    wrap.appendChild(b);
+  });
+  setPhase("phMission");
+}
+
+function rebuildScene() {
+  if (!ST || ST.fake) return;
+  ST.clearScene();
+  $("loadRange").value = 0;
+  $("loadVal").textContent = cur.val(0);
+  setExtraHTML("");
+  BUILDERS[cur.id]();
+  onLoadInput();
+}
+
+function startExp() {
+  setPhase("phExp");
+  $("guessLine").textContent = "きみの予想：「" + cur.mission.opts[missionPick] + "」── 実験で確かめよう";
+  $("sliderLabel").textContent = cur.sliderLabel;
+  $("expLegend").innerHTML = cur.legend.map((x) => "<span>" + x + "</span>").join("");
+  $("expNote").innerHTML = cur.note;
+  setExtraHTML("");
+  $("loadRange").value = 0;
+  $("loadVal").textContent = cur.val(0);
+  const btn = $("btnToReveal");
+  btn.disabled = true;
+  ensureStage();
+  if (ST.fake) { btn.disabled = false; return; }
+  ST.clearScene();
+  ST.resetView();
+  BUILDERS[cur.id]();
+  ST.resize();
+}
+
+/* 📐図面の目：カメラスナップ＋方眼＋3面ビュー表示（正面→上→横×3周で自動復帰） */
+$("btnMicro").addEventListener("click", () => {
+  if (!ST || ST.fake) return;
+  vib(10);
+  ST.toggleBlueprint();
+});
+
+function onLoadInput() {
+  const v = +$("loadRange").value;
+  $("loadVal").textContent = cur ? cur.val(v) : v;
+  if (ST && !ST.fake && ST.sceneApi && ST.sceneApi.update) ST.sceneApi.update(v / 100);
+  $("btnToReveal").disabled = false;
+}
+$("loadRange").addEventListener("input", onLoadInput);
+
+$("btnToReveal").addEventListener("click", () => {
+  if (ST && ST.stopBlueprint) ST.stopBlueprint();
+  const m = cur.mission;
+  const hit = missionPick === m.ans;
+  $("rvBanner").innerHTML = (hit ? "🎯 予想的中！" : "💡 実験で見えたね！") + "<small>こたえ：" + m.ansLine + "</small>";
+  cardIdx = 0;
+  setPhase("phReveal");
+  renderCard();
+});
+
+function renderCard() {
+  $("rvCard").innerHTML = "<div>" + cur.cards[cardIdx] + "</div>";
+  $("rvDots").innerHTML = cur.cards.map((_, i) => (i <= cardIdx ? "<span>●</span>" : "○")).join("");
+  $("btnCardNext").textContent = cardIdx < cur.cards.length - 1 ? "つぎ →" : "ミニクイズへ →";
+  buildCardScene(cur.id, cardIdx);
+}
+$("btnCardNext").addEventListener("click", () => {
+  if (cardIdx < cur.cards.length - 1) { cardIdx++; renderCard(); }
+  else startQuiz();
+});
+
+function startQuiz() {
+  setPhase("phQuiz");
+  const qz = cur.quiz;
+  $("qzQ").textContent = qz.q;
+  $("qzExp").style.display = "none";
+  $("btnQuizDone").style.display = "none";
+  const wrap = $("qzOpts");
+  wrap.innerHTML = "";
+  let answered = false;
+  qz.opts.forEach((o, idx) => {
+    const b = document.createElement("button");
+    b.className = "opt";
+    b.textContent = (idx + 1) + ". " + o;
+    b.addEventListener("click", () => {
+      if (answered) return;
+      answered = true;
+      const correct = idx === qz.ans;
+      wrap.querySelectorAll(".opt").forEach((x, xi) => {
+        if (xi === qz.ans) x.classList.add("correct");
+        else if (xi === idx) x.classList.add("wrong");
+        else x.classList.add("dim");
+      });
+      $("qzExp").innerHTML = qz.exp;
+      $("qzExp").style.display = "block";
+      $("btnQuizDone").style.display = "block";
+      /* B2分散学習：クリア済みミニクイズは復習キュー登録対象（間違えた時は即登録、正解時も新規なら緩く登録） */
+      if (!correct) {
+        rqUpsert("quiz-" + cur.id, { type: "quiz", lessonId: cur.id });
+      }
+    });
+    wrap.appendChild(b);
+  });
+}
+
+$("btnQuizDone").addEventListener("click", () => {
+  progress.done[cur.id] = true;
+  bumpStreak();
+  saveProgress();
+  $("clearStamp").innerHTML = cur.tag + " CLEAR!<small>今朝の15分 完了</small>";
+  $("teaserBox").innerHTML = "🔮 <b>これが分かると…</b><br>" + (cur.teaser || "");
+  const s = progress.streak;
+  $("clearMsg").innerHTML = "🔥 " + s.n + "週れんぞく<br>" + (curIdx < LESSONS.length - 1 ? "次回：" + LESSONS[curIdx + 1].tag + " " + LESSONS[curIdx + 1].title : "次回：章ボス戦！");
+  setPhase("phClear");
+});
+
+$("btnGoHome").addEventListener("click", () => { renderHome(); showView("viewHome"); });
+$("btnBack").addEventListener("click", () => { if (ST && ST.stopBlueprint) ST.stopBlueprint(); renderHome(); showView("viewHome"); });
+
+/* ================================================================
+   ボス戦（7問）
+================================================================ */
+let bIdx = 0, bScore = 0;
+function openBoss() {
+  bIdx = 0; bScore = 0;
+  showView("viewBoss");
+  $("bossPlay").style.display = "block";
+  $("bossResult").style.display = "none";
+  renderBossQ();
+}
+function renderBossQ() {
+  const q = BOSS[bIdx];
+  $("bsProgress").textContent = "第" + (bIdx + 1) + "問 ／ 7問中 ── 正解 " + bScore;
+  $("bsQ").textContent = q.q;
+  $("bsExp").style.display = "none";
+  $("btnBossNext").style.display = "none";
+  const wrap = $("bsOpts");
+  wrap.innerHTML = "";
+  let answered = false;
+  q.opts.forEach((o, idx) => {
+    const b = document.createElement("button");
+    b.className = "opt";
+    b.textContent = (idx + 1) + ". " + o;
+    b.addEventListener("click", () => {
+      if (answered) return;
+      answered = true;
+      const correct = idx === q.ans;
+      if (correct) bScore++;
+      else rqUpsert("boss-" + bIdx, { type: "boss", idx: bIdx });
+      wrap.querySelectorAll(".opt").forEach((x, xi) => {
+        if (xi === q.ans) x.classList.add("correct");
+        else if (xi === idx) x.classList.add("wrong");
+        else x.classList.add("dim");
+      });
+      $("bsExp").innerHTML = q.exp;
+      $("bsExp").style.display = "block";
+      $("btnBossNext").style.display = "block";
+      $("btnBossNext").textContent = bIdx < BOSS.length - 1 ? "つぎ →" : "結果を見る →";
+    });
+    wrap.appendChild(b);
+  });
+}
+$("btnBossNext").addEventListener("click", () => {
+  if (bIdx < BOSS.length - 1) { bIdx++; renderBossQ(); }
+  else {
+    $("bossPlay").style.display = "none";
+    $("bossResult").style.display = "block";
+    $("bsScore").textContent = bScore + " / 7";
+    if (bScore >= 5) {
+      progress.done["l7"] = true;
+      bumpStreak();
+      saveProgress();
+      $("bsMsg").innerHTML = "🏆 第1章 制覇！<br>⚔ 判断ドリルが解放された！<br>第2章「機械要素図鑑」は次のアップデートで配信。";
+    } else {
+      $("bsMsg").innerHTML = "あと少し！ 5問正解でクリア。<br>まちがえたレッスンを触り直してから再挑戦。";
+    }
+  }
+});
+$("btnBossHome").addEventListener("click", () => { renderHome(); showView("viewHome"); });
+$("btnBackB").addEventListener("click", () => { renderHome(); showView("viewHome"); });
+
+/* ================================================================
+   ⚔ 設計判断ドリル（5問・OK/NG即断）
+================================================================ */
+let dSet = [], dIdx = 0, dScore = 0, dResults = [];
+function openDrill() {
+  dSet = pickDrillSet(5);
+  dIdx = 0; dScore = 0; dResults = [];
+  showView("viewDrill");
+  $("drillPlay").style.display = "block";
+  $("drillResult").style.display = "none";
+  renderDrillQ();
+}
+function renderDrillQ() {
+  const d = dSet[dIdx];
+  $("dqProgress").textContent = "第" + (dIdx + 1) + "問 ／ 5問中 ── 正解 " + dScore;
+  $("dqText").textContent = d.situation;
+  $("dqTag").textContent = "分野：" + d.tag;
+  $("dqExp").style.display = "none";
+  $("btnDrillNext").style.display = "none";
+  const okBtn = $("btnOK"), ngBtn = $("btnNG");
+  okBtn.className = ""; ngBtn.className = "";
+  okBtn.disabled = false; ngBtn.disabled = false;
+  let answered = false;
+  function pick(choice) {
+    if (answered) return;
+    answered = true;
+    okBtn.disabled = true; ngBtn.disabled = true;
+    const correct = choice === d.ans;
+    drillStats.seen[d.id] = true;
+    drillStats.totalCount = (drillStats.totalCount || 0) + 1;
+    if (correct) {
+      drillStats.correctCount = (drillStats.correctCount || 0) + 1;
+      drillStats.wrong[d.id] = 0;
+      dScore++;
+    } else {
+      drillStats.wrong[d.id] = (drillStats.wrong[d.id] || 0) + 1;
+      /* B8熟達研究：間違えたドリルは復習キューへ */
+      rqUpsert("drill-" + d.id, { type: "drill", drillId: d.id });
+    }
+    saveDrillStats();
+    dResults.push(correct);
+    const pickBtn = choice === "OK" ? okBtn : ngBtn;
+    const otherBtn = choice === "OK" ? ngBtn : okBtn;
+    pickBtn.classList.add(correct ? "correct" : "wrong");
+    if (d.ans !== choice) {
+      (d.ans === "OK" ? okBtn : ngBtn).classList.add("correct");
+    }
+    otherBtn.classList.add("dim");
+    $("dqExp").innerHTML = "<b>正解：" + d.ans + "</b><br>" + d.reason + "<br>" + d.fix;
+    $("dqExp").style.display = "block";
+    $("btnDrillNext").style.display = "block";
+    $("btnDrillNext").textContent = dIdx < dSet.length - 1 ? "つぎ →" : "結果を見る →";
+    vib(correct ? [20, 20, 40] : 30);
+  }
+  okBtn.onclick = () => pick("OK");
+  ngBtn.onclick = () => pick("NG");
+}
+$("btnDrillNext").addEventListener("click", () => {
+  if (dIdx < dSet.length - 1) { dIdx++; renderDrillQ(); }
+  else {
+    $("drillPlay").style.display = "none";
+    $("drillResult").style.display = "block";
+    $("dResultScore").textContent = dScore + " / 5";
+    $("dResultRow").innerHTML = dResults.map((r) => '<span class="' + (r ? "o" : "x") + '">' + (r ? "○" : "×") + "</span>").join("");
+    /* 弱点分野の表示 */
+    const tagCount = {};
+    Object.keys(drillStats.wrong).forEach((id) => {
+      if (drillStats.wrong[id] > 0) {
+        const d = DRILLS.find((x) => x.id === id);
+        if (d) { const t = d.tag.split("(")[0]; tagCount[t] = (tagCount[t] || 0) + drillStats.wrong[id]; }
+      }
+    });
+    const weakSorted = Object.keys(tagCount).sort((a, b) => tagCount[b] - tagCount[a]);
+    const total = drillStats.totalCount || 1;
+    const rate = Math.round((drillStats.correctCount || 0) / total * 100);
+    $("dWeak").innerHTML = "通算正答率 <b>" + rate + "%</b>（" + (drillStats.correctCount || 0) + "/" + total + "問）<br>" +
+      (weakSorted.length ? "弱点分野：<b>" + weakSorted.slice(0, 2).join("・") + "</b>（復習キューに登録済み）" : "まだ弱点なし。いいペース！");
+  }
+});
+$("btnDrillResultHome").addEventListener("click", () => { renderHome(); showView("viewHome"); });
+$("btnBackD").addEventListener("click", () => { renderHome(); showView("viewHome"); });
+
+/* ================================================================
+   ⚡ 復習キュー（間隔反復・上限5問）
+================================================================ */
+let rqSet = [], rqIdx = 0, rqScore = 0;
+function openReview() {
+  rqSet = rqDueList().map((item) => ({ item, q: rqResolveQuestion(item) })).filter((x) => x.q);
+  if (!rqSet.length) { renderHome(); showView("viewHome"); return; }
+  rqIdx = 0; rqScore = 0;
+  showView("viewReview");
+  $("reviewPlay").style.display = "block";
+  $("reviewResult").style.display = "none";
+  renderRQQ();
+}
+function renderRQQ() {
+  const { item, q } = rqSet[rqIdx];
+  $("rqProgress").textContent = "第" + (rqIdx + 1) + "問 ／ " + rqSet.length + "問中（忘れかけた頃の再登場）";
+  $("rqText").textContent = q.q;
+  $("rqExp").style.display = "none";
+  $("btnRQNext").style.display = "none";
+  const wrap = $("rqOpts");
+  wrap.innerHTML = "";
+  let answered = false;
+  q.opts.forEach((o, idx) => {
+    const b = document.createElement("button");
+    b.className = "opt";
+    b.textContent = q.drill ? o : (idx + 1) + ". " + o;
+    b.addEventListener("click", () => {
+      if (answered) return;
+      answered = true;
+      const correct = idx === q.ans;
+      if (correct) rqScore++;
+      rqAnswer(item, correct);
+      wrap.querySelectorAll(".opt").forEach((x, xi) => {
+        if (xi === q.ans) x.classList.add("correct");
+        else if (xi === idx) x.classList.add("wrong");
+        else x.classList.add("dim");
+      });
+      $("rqExp").innerHTML = q.exp;
+      $("rqExp").style.display = "block";
+      $("btnRQNext").style.display = "block";
+      $("btnRQNext").textContent = rqIdx < rqSet.length - 1 ? "つぎ →" : "結果を見る →";
+    });
+    wrap.appendChild(b);
+  });
+}
+$("btnRQNext").addEventListener("click", () => {
+  if (rqIdx < rqSet.length - 1) { rqIdx++; renderRQQ(); }
+  else {
+    $("reviewPlay").style.display = "none";
+    $("reviewResult").style.display = "block";
+    $("rqResultScore").textContent = rqScore + " / " + rqSet.length;
+    bumpStreak();
+    saveProgress();
+  }
+});
+$("btnRQHome").addEventListener("click", () => { renderHome(); showView("viewHome"); });
+$("btnBackRQ").addEventListener("click", () => { renderHome(); showView("viewHome"); });
+
+/* ================================================================
+   🗺 10年マスターマップ
+================================================================ */
+const MASTER_MAP = [
+  { stage: "Stage1", year: "1年目", title: "基礎の目", chaps: [
+    { name: "第1章 図面と公差の言語", done: true, now: false },
+    { name: "第2章 機械要素図鑑", done: false, now: false, lock: true },
+    { name: "第3章 材料と熱処理", done: false, now: false, lock: true },
+    { name: "第4章 加工の都合", done: false, now: false, lock: true },
+    { name: "第5章 締結と接合", done: false, now: false, lock: true },
+    { name: "第6章 Stage1卒業ボス", done: false, now: false, lock: true }
+  ] },
+  { stage: "Stage2", year: "2-3年", title: "計算が武器", chaps: [
+    { name: "強度設計", lock: true }, { name: "軸系設計", lock: true }, { name: "幾何公差", lock: true },
+    { name: "要素の選定計算", lock: true }, { name: "ばね・歯車設計", lock: true }, { name: "検図道場", lock: true }
+  ] },
+  { stage: "Stage3", year: "4-6年", title: "システム設計", chaps: [
+    { name: "機構", lock: true }, { name: "ユニット設計", lock: true }, { name: "DFM・DFA", lock: true },
+    { name: "コスト設計", lock: true }, { name: "安全と規格", lock: true }, { name: "トラブルシュート", lock: true }
+  ] },
+  { stage: "Stage4", year: "7-10年", title: "マスター", chaps: [
+    { name: "最適化とCAE連携", lock: true }, { name: "新規開発の型", lock: true }, { name: "標準化", lock: true },
+    { name: "特許と発明", lock: true }, { name: "レビュー力", lock: true }, { name: "師範代", lock: true }
+  ] }
+];
+function renderMap() {
+  const wrap = $("mapStage");
+  wrap.innerHTML = "";
+  const ch1Done = LESSONS.every((L) => progress.done[L.id]) && progress.done["l7"];
+  MASTER_MAP[0].chaps[0].done = true;
+  MASTER_MAP[0].chaps[0].now = !ch1Done;
+  MASTER_MAP[0].chaps[1].now = ch1Done;
+  MASTER_MAP.forEach((st, si) => {
+    const box = document.createElement("div");
+    box.className = "mapstagebox" + (si === 0 ? " current" : "");
+    let pin = "";
+    if (si === 0) pin = '<span class="mspin">📍現在地</span>';
+    box.innerHTML = '<div class="msTitle">' + st.stage + " " + st.title + " " + pin + '<span class="msYear">（' + st.year + "）</span></div>";
+    const chapsWrap = document.createElement("div");
+    chapsWrap.className = "mapchaps";
+    st.chaps.forEach((c) => {
+      const chip = document.createElement("span");
+      chip.className = "mapchap" + (c.done ? " done" : c.now ? " now" : "");
+      chip.textContent = (c.lock ? "🔒 " : c.done ? "✓ " : "") + c.name;
+      chapsWrap.appendChild(chip);
+    });
+    box.appendChild(chapsWrap);
+    wrap.appendChild(box);
+  });
+}
+$("btnMapHome").addEventListener("click", () => { renderMap(); showView("viewMap"); });
+$("btnBackMap").addEventListener("click", () => { renderHome(); showView("viewHome"); });
+$("btnDrillHome").addEventListener("click", openDrill);
+
+/* ================================================================
+   起動
+================================================================ */
+renderHome();
+if ("serviceWorker" in navigator) {
+  window.addEventListener("load", () => {
+    navigator.serviceWorker.register("./sw.js").catch(() => {});
+  });
+}
+</script>
+</body>
+</html>
