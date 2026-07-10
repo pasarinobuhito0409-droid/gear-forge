@@ -325,6 +325,148 @@
     border: 1px solid #1d2c42; background: #0b1220; color: #8fa6bd; font-size: 12.5px; text-decoration: none;
   }
   .mapbroslink b { color: #bcdcff; }
+
+  /* ================= v2 追加装備 ================= */
+  /* ⚡FORGE Lv（共有XP）ヘッダー */
+  .lvhead { display: flex; align-items: center; justify-content: space-between; gap: 10px; margin-top: 4px; }
+  .lvhead b { font-size: 13.5px; font-weight: 900; color: #ffe9a3; text-shadow: 0 0 10px rgba(255,214,79,0.5); white-space: nowrap; }
+  .lvbarWrap { flex: 1; height: 7px; border-radius: 5px; background: #101825; overflow: hidden; }
+  .lvbarWrap div { height: 100%; width: 0%; background: linear-gradient(90deg, #ffd64f, #ff9d4f); box-shadow: 0 0 8px rgba(255,214,79,0.6); transition: width 0.6s; }
+
+  /* 🏅称号棚 */
+  .titleshelf { margin-top: 12px; }
+  .titleshelf .tsHead { font-size: 11.5px; color: #5d7690; font-weight: 800; margin-bottom: 6px; }
+  .tsRow { display: flex; gap: 7px; flex-wrap: wrap; }
+  .tsItem { width: 52px; text-align: center; font-size: 10px; color: #9fb4cb; }
+  .tsIcon { width: 40px; height: 40px; margin: 0 auto; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 18px; border: 1.5px solid #2a3c56; background: #0b1220; }
+  .tsItem.gold .tsIcon { border-color: #ffd64f; background: rgba(255,214,79,0.12); box-shadow: 0 0 10px rgba(255,214,79,0.4); }
+  .tsItem.silver .tsIcon { border-color: #b8c2cc; background: rgba(184,194,204,0.1); }
+  .tsItem.locked .tsIcon { opacity: 0.28; filter: grayscale(1); }
+  .tsItem .tsName { margin-top: 3px; font-size: 8.5px; line-height: 1.3; }
+
+  /* 🔀FORGE DAILY */
+  .dailycard {
+    margin-top: 12px; padding: 12px 14px; border-radius: 13px;
+    border: 1.5px solid rgba(255,93,190,0.55); background: rgba(255,93,190,0.07);
+    cursor: pointer; font: inherit; display: block; width: 100%; text-align: left;
+  }
+  .dailycard .dt { font-size: 14px; font-weight: 900; color: #ffc3e6; }
+  .dailycard .ds { font-size: 10.5px; color: #cf94b6; margin-top: 2px; }
+  .dailybadge {
+    display: inline-block; font-size: 10px; font-weight: 800; padding: 2px 7px; border-radius: 999px;
+    background: rgba(127,184,255,0.16); border: 1px solid rgba(127,184,255,0.5); color: #bcdcff; margin-right: 6px;
+  }
+
+  /* 🦠錆サマリー・🎯較正メーター */
+  .rustsummary {
+    display: block; width: 100%; margin-top: 10px; padding: 9px 12px; border-radius: 11px;
+    border: 1px solid rgba(196,120,40,0.55); background: rgba(196,120,40,0.09); color: #ffb98f;
+    font-size: 12px; font-weight: 800; text-align: center; cursor: pointer; font-family: inherit;
+  }
+  .calmeter { margin-top: 8px; text-align: center; font-size: 11.5px; color: #9fc6ff; }
+
+  /* 🦠サビマップ（ホームnode装飾） */
+  .node.fresh .dot { box-shadow: 0 0 14px 3px rgba(160,123,255,0.65), 0 0 10px rgba(127,184,255,0.5); }
+  .node.dull .dot { filter: saturate(0.55); }
+  .node.rust1 .dot { background-image: radial-gradient(circle at 28% 32%, rgba(196,120,40,0.55) 0 3px, transparent 4px), radial-gradient(circle at 66% 58%, rgba(196,120,40,0.5) 0 2.5px, transparent 3.5px), radial-gradient(circle at 48% 78%, rgba(196,120,40,0.45) 0 2px, transparent 3px); }
+  .node.rust2 .dot { filter: saturate(0.5); border-color: #b8451f; background-image: radial-gradient(circle at 28% 32%, rgba(180,60,20,0.78) 0 4px, transparent 5px), radial-gradient(circle at 68% 55%, rgba(180,60,20,0.72) 0 3.5px, transparent 4.5px), radial-gradient(circle at 45% 80%, rgba(180,60,20,0.68) 0 3px, transparent 4px), radial-gradient(circle at 80% 26%, rgba(180,60,20,0.6) 0 2.5px, transparent 3.5px); }
+  .node .rustchip { display: none; font-size: 8px; color: #ff9d6e; font-weight: 800; margin-top: 1px; }
+  .node.rust2 .rustchip { display: block; }
+  @keyframes repaintsweep { 0% { transform: translateX(-120%) rotate(18deg); opacity: 0; } 15% { opacity: 1; } 100% { transform: translateX(120%) rotate(18deg); opacity: 0; } }
+  .node.repainting .dot { position: relative; overflow: hidden; }
+  .node.repainting .dot::after {
+    content: ""; position: absolute; top: -30%; left: 0; width: 40%; height: 160%;
+    background: linear-gradient(100deg, transparent, rgba(190,225,255,0.95), rgba(160,123,255,0.9), transparent);
+    animation: repaintsweep 0.85s ease-out;
+  }
+
+  /* 🎯自信ベット（共通） */
+  .confbox { margin-top: 12px; padding: 12px 13px; border-radius: 12px; border: 1.5px solid rgba(160,123,255,0.55); background: rgba(160,123,255,0.08); text-align: center; }
+  .confbox .confq { font-size: 12.5px; font-weight: 800; color: #d9c8ff; margin-bottom: 9px; }
+  .confrow { display: flex; gap: 9px; }
+  .confbtn { flex: 1; padding: 12px 6px; border-radius: 11px; font: inherit; font-weight: 900; font-size: 14px; cursor: pointer; border: 1.5px solid #3a3c56; background: #0b1220; color: #dfeaf6; }
+  .confbtn.confYes { border-color: #ffd64f; color: #ffe9a3; }
+  .confbtn.confMid { border-color: #7fb8ff; color: #bcdcff; }
+  .confbadge { display: inline-block; margin-top: 8px; font-size: 11px; padding: 3px 9px; border-radius: 999px; font-weight: 800; }
+  .confbadge.hit { background: rgba(62,240,160,0.15); color: #3ef0a0; border: 1px solid #3ef0a0; }
+  .confbadge.miss { background: rgba(255,93,77,0.15); color: #ff5d4d; border: 1px solid #ff5d4d; }
+
+  /* 🎓教えるモード */
+  .teachhint { margin-top: 9px; font-size: 11px; color: #5d7690; text-align: center; }
+  .teachbox { margin-top: 16px; text-align: left; }
+  .teachbox .tbLabel { font-size: 12.5px; color: #d9c8ff; font-weight: 800; margin-bottom: 7px; }
+  .teachbox textarea {
+    width: 100%; min-height: 64px; border-radius: 11px; border: 1.5px solid #2a3c56; background: #0b1220;
+    color: #eaf6ff; font: inherit; font-size: 14px; padding: 10px 12px; resize: vertical;
+  }
+  .teachbtnrow { display: flex; gap: 8px; margin-top: 8px; }
+  .teachbtnrow button { flex: 1; padding: 10px; border-radius: 10px; font: inherit; font-weight: 800; font-size: 12.5px; cursor: pointer; }
+  .teachSend { border: none; background: linear-gradient(135deg, #a07bff, #7fb8ff); color: #0a0f1a; }
+  .teachSkip { border: 1px solid #2a3c56; background: #0b1220; color: #9fb4cb; }
+  .teachsaved { margin-top: 8px; font-size: 11.5px; color: #3ef0a0; display: none; }
+  .teachecho { margin-top: 10px; padding: 10px 12px; border-left: 3px solid #a07bff; border-radius: 7px; background: rgba(160,123,255,0.07); font-size: 12.5px; color: #d9c8ff; line-height: 1.6; }
+
+  /* 🎓俺の言葉ノート・モーダル */
+  #teachModal { display: none; position: fixed; inset: 0; z-index: 60; background: rgba(4,6,10,.87); align-items: center; justify-content: center; padding: 14px; }
+  .tm-sheet { position: relative; width: min(560px, 100%); max-height: 86vh; overflow-y: auto; background: #0d1524; border: 1px solid #24344a; border-radius: 16px; padding: 14px 14px 18px; }
+  #tmClose { position: absolute; top: 8px; right: 8px; width: 34px; height: 34px; border-radius: 50%; border: 1px solid #3a3c56; background: #14171d; color: #cfd6df; font-size: 15px; z-index: 2; }
+  #tmTitle { font-weight: 800; font-size: 15px; color: #d9c8ff; margin: 2px 40px 12px 2px; }
+  .tmItem { padding: 10px 0; border-top: 1px solid #1d2c42; }
+  .tmItem:first-child { border-top: none; }
+  .tmMeta { font-size: 11px; color: #7f96b0; margin-bottom: 4px; }
+  .tmTxt { font-size: 13.5px; color: #eaf6ff; line-height: 1.65; }
+  .tmEmpty { text-align: center; color: #5d7690; font-size: 13px; padding: 30px 10px; }
+
+  /* 🎰ご褒美ガチャ */
+  #gachaModal { display: none; position: fixed; inset: 0; z-index: 65; background: rgba(2,4,8,.9); align-items: center; justify-content: center; padding: 14px; }
+  .gm-sheet { position: relative; width: min(360px, 100%); text-align: center; padding: 30px 20px; border-radius: 18px; border: 1.5px solid #2a3c56; background: linear-gradient(165deg, #10182a, #0a0f1a); overflow: hidden; }
+  .gm-drum { font-size: 52px; margin: 10px 0; animation: gmspin 0.12s linear infinite; }
+  @keyframes gmspin { 0% { transform: rotateY(0deg) scale(1); } 50% { transform: rotateY(180deg) scale(1.1); } 100% { transform: rotateY(360deg) scale(1); } }
+  .gm-result { display: none; }
+  .gm-result.rare .gmTier { color: #cfd8e2; text-shadow: 0 0 14px rgba(200,210,225,0.8); }
+  .gm-result.super .gmTier { color: #ffd64f; text-shadow: 0 0 18px rgba(255,214,79,0.85); }
+  .gmIcon { font-size: 56px; }
+  .gmTier { font-size: 13px; font-weight: 900; letter-spacing: 2px; margin-top: 8px; }
+  .gmTitle { margin-top: 10px; font-size: 15px; font-weight: 800; color: #eaf6ff; }
+  .gmXp { margin-top: 6px; font-size: 12px; color: #7fb8ff; }
+  #gachaCloseBtn { display: none; margin-top: 18px; width: 100%; padding: 12px; border: none; border-radius: 11px; font: inherit; font-weight: 900; background: linear-gradient(135deg, #7fb8ff, #a8d4ff); color: #06111f; cursor: pointer; }
+  .gm-superfx { position: absolute; inset: 0; pointer-events: none; overflow: hidden; border-radius: 18px; }
+  @keyframes gearspincw { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+  @keyframes gearspinccw { from { transform: rotate(0deg); } to { transform: rotate(-360deg); } }
+  @keyframes gmring { 0% { box-shadow: 0 0 0 0 rgba(255,214,79,0.9); border-color: rgba(255,214,79,0.9); } 100% { box-shadow: 0 0 40px 20px rgba(255,214,79,0); border-color: rgba(255,214,79,0); } }
+  .gm-particles { position: absolute; inset: 0; pointer-events: none; overflow: hidden; border-radius: 18px; }
+  .gm-particles span { position: absolute; left: 50%; top: 42%; width: 6px; height: 6px; border-radius: 50%; opacity: 0; animation: gmpart 0.9s ease-out forwards; }
+  @keyframes gmpart {
+    0% { transform: translate(0, 0) scale(1); opacity: 1; }
+    100% { transform: translate(var(--dx), var(--dy)) scale(0.3); opacity: 0; }
+  }
+
+  /* 📷現場の目モーダル */
+  #photoModal { display: none; position: fixed; inset: 0; z-index: 60; background: rgba(4,6,10,.87); align-items: center; justify-content: center; padding: 14px; }
+  .pm-sheet { position: relative; width: min(560px, 100%); max-height: 92vh; overflow-y: auto; background: #0d1524; border: 1px solid #24344a; border-radius: 16px; padding: 14px 14px 18px; }
+  #pmClose { position: absolute; top: 8px; right: 8px; width: 34px; height: 34px; border-radius: 50%; border: 1px solid #3a3c56; background: #14171d; color: #cfd6df; font-size: 15px; z-index: 2; }
+  #pmTitle { font-weight: 800; font-size: 15px; color: #ffd9a3; margin: 2px 40px 10px 2px; }
+  #pmFig { position: relative; border-radius: 12px; overflow: hidden; background: #0a0f1a; }
+  #pmFig img { display: block; width: 100%; height: auto; }
+  .pm-marker { position: absolute; transform: translate(-50%, -50%); display: flex; align-items: center; gap: 6px; pointer-events: none; }
+  .pm-dot { width: 14px; height: 14px; border-radius: 50%; border: 2px solid #7fb8ff; background: rgba(127,184,255,.25); animation: pmPulse 1.6s infinite; flex: none; }
+  .pm-label { background: rgba(8,12,20,.85); border: 1px solid #7fb8ff; color: #dff0f8; font-size: 11px; font-weight: 700; padding: 3px 8px; border-radius: 999px; max-width: 52vw; line-height: 1.4; }
+  @keyframes pmPulse { 0% { box-shadow: 0 0 0 0 rgba(127,184,255,.6); } 70% { box-shadow: 0 0 0 12px rgba(127,184,255,0); } 100% { box-shadow: 0 0 0 0 rgba(127,184,255,0); } }
+  #pmCap { color: #c6cdd6; font-size: 12.5px; line-height: 1.75; margin: 10px 2px 4px; }
+  .pm-video { display: inline-block; margin: 8px 0 2px; padding: 9px 14px; border-radius: 999px; background: #b8352f; color: #fff; font-weight: 800; font-size: 12.5px; text-decoration: none; }
+  #pmCredit { color: #7b838d; font-size: 10.5px; margin-top: 8px; }
+
+  /* 🛂FORGE PASSPORT */
+  .passport { margin-top: 14px; border: 1.5px solid rgba(255,214,79,0.5); border-radius: 13px; padding: 11px 12px; background: rgba(255,214,79,0.05); }
+  .passport .pt { font-size: 12px; font-weight: 900; color: #ffe9a3; margin-bottom: 8px; }
+  .pbadges { display: flex; gap: 6px; flex-wrap: wrap; }
+  .pbadge { flex: 1; min-width: 68px; text-align: center; border: 1px solid #24344a; border-radius: 10px; padding: 7px 3px; background: #0b1220; font-size: 10px; color: #9fb4cb; text-decoration: none; }
+  .pbadge.pblv { border-color: rgba(255,214,79,0.6); background: rgba(255,214,79,0.08); }
+  .pbemoji { font-size: 15px; line-height: 1; }
+  .pbname { margin-top: 3px; font-size: 10px; font-weight: 800; color: #bcdcff; }
+  .pbpct { margin-top: 2px; font-size: 11.5px; font-weight: 900; color: #9fc6ff; }
+  .pbbar { margin-top: 4px; height: 4px; border-radius: 3px; background: #101825; overflow: hidden; }
+  .pbbar div { height: 100%; background: linear-gradient(90deg, #7fb8ff, #a07bff); }
 </style>
 </head>
 <body>
@@ -343,16 +485,34 @@
   <section id="viewHome" style="display:block">
     <div class="home-logo">GEAR FORGE</div>
     <div class="home-sub">機械設計 ── 朝15分・触って選んで覚える道場</div>
+    <div class="lvhead"><b id="xpLv">⚡FORGE Lv.1</b><div class="lvbarWrap"><div id="xpBar"></div></div></div>
 
     <div class="gearhero">
       <div class="gstage" id="gearStage"></div>
       <div class="gline"><b id="gearTitle">発明チャージ 0%</b><span id="gearSub">（歯車 1/8）</span><div class="gbar"><div id="gearBar"></div></div></div>
     </div>
 
+    <div class="titleshelf">
+      <div class="tsHead">🏅 称号棚</div>
+      <div class="tsRow" id="titleShelf"></div>
+    </div>
+
+    <button class="dailycard" id="btnDaily" style="display:none">
+      <div class="dt">🔀 FORGE DAILY ── 家族ミックス5問</div>
+      <div class="ds" id="dailySub">兄弟アプリの復習を交ぜて出題</div>
+    </button>
+
     <button class="rqcard" id="btnRQ" style="display:none">
       <div><div class="rqt" id="rqTitle">⚡ 今日の復習 0問</div><div class="rqs">忘れかけた頃に再登場（2分）</div></div>
       <div class="rqarrow">→</div>
     </button>
+
+    <button class="rustsummary" id="btnRustSummary" style="display:none">🦠 錆びかけ <span id="rustCount">0</span>件 ── タップで再塗装</button>
+
+    <div class="passport">
+      <div class="pt">🛂 FORGE PASSPORT ── 兄弟アプリの進捗が1画面に</div>
+      <div class="pbadges" id="passportBadges"></div>
+    </div>
 
     <button class="resume" id="btnResume"></button>
     <div class="goalbanner">🎯 ゴール：制約を同時に満たす設計解を出せる設計者</div>
@@ -365,8 +525,9 @@
     </div>
     <div class="chap2">🔒 第2章 機械要素図鑑へ（軸受・歯車・ばね・カム）<br>第1章クリアで解放（次のアップデートで配信）</div>
     <div class="streak" id="streakLine"></div>
+    <div class="calmeter" id="calMeter"></div>
     <div class="installhint">スマホ：ブラウザの共有メニュー →「ホーム画面に追加」でアプリになる</div>
-    <div class="verline">GEAR FORGE v1.0 ─ 第1章（ARC/FORCE/VOLT/BENDの兄弟）</div>
+    <div class="verline">GEAR FORGE v2.0 ─ 第1章（ARC/FORCE/VOLT/BEND/COATの兄弟・FORGE家族共通装備）</div>
   </section>
 
   <!-- ============ レッスン ============ -->
@@ -394,6 +555,7 @@
       </div>
       <div id="msOpts"></div>
       <div class="mhint">↑ 予想してタップ（外れてもOK。実験で確かめる）</div>
+      <div class="teachhint">🎓 クリア後、新人への一言説明を書く</div>
     </div>
 
     <div id="phExp" style="display:none">
@@ -403,6 +565,8 @@
       <div class="extra" id="extraCtrls"></div>
       <div class="trynote" id="expNote"></div>
       <button class="cta alt" id="btnMicro">📐 図面の目</button>
+      <button class="cta alt" id="btnAtomic">🔬 接触の目</button>
+      <button class="cta alt" id="btnPhoto" style="display:none">📷 現場の目</button>
       <button class="cta" id="btnToReveal" disabled>答え合わせ →</button>
     </div>
 
@@ -425,6 +589,15 @@
       <div class="stamp" id="clearStamp"></div>
       <div class="teaser" id="teaserBox"></div>
       <div class="clearmsg" id="clearMsg"></div>
+      <div class="teachbox" id="teachBoxLesson">
+        <div class="tbLabel">🎓 明日入る新人に、今日のことを1〜2行で説明して</div>
+        <textarea id="teachTxtLesson" placeholder="例：〇〇はこういう理由でこうする…"></textarea>
+        <div class="teachbtnrow">
+          <button class="teachSend" id="btnTeachSendLesson">送信（+5XP）</button>
+          <button class="teachSkip" id="btnTeachSkipLesson">あとで</button>
+        </div>
+        <div class="teachsaved" id="teachSavedLesson">✅ 俺の言葉ノートに保存した</div>
+      </div>
       <button class="cta" id="btnGoHome">マップへもどる</button>
     </div>
   </section>
@@ -445,6 +618,15 @@
     <div id="bossResult" class="center" style="display:none">
       <div class="bossscore" id="bsScore"></div>
       <div class="clearmsg" id="bsMsg"></div>
+      <div class="teachbox" id="teachBoxBoss" style="display:none">
+        <div class="tbLabel">🎓 明日入る新人に、今日のことを1〜2行で説明して</div>
+        <textarea id="teachTxtBoss" placeholder="例：〇〇はこういう理由でこうする…"></textarea>
+        <div class="teachbtnrow">
+          <button class="teachSend" id="btnTeachSendBoss">送信（+5XP）</button>
+          <button class="teachSkip" id="btnTeachSkipBoss">あとで</button>
+        </div>
+        <div class="teachsaved" id="teachSavedBoss">✅ 俺の言葉ノートに保存した</div>
+      </div>
       <button class="cta" id="btnBossHome">マップへもどる</button>
     </div>
   </section>
@@ -493,7 +675,7 @@
     </div>
     <div id="reviewResult" class="center" style="display:none">
       <div class="bossscore" id="rqResultScore"></div>
-      <div class="clearmsg">🔥 忘れかけた記憶をしっかり固定した</div>
+      <div class="clearmsg" id="rqClearMsg">🔥 忘れかけた記憶をしっかり固定した</div>
       <button class="cta" id="btnRQHome">マップへもどる</button>
     </div>
   </section>
@@ -505,6 +687,7 @@
       <span class="tag">🗺 MAP</span><span>10年マスターマップ</span>
     </div>
     <div class="teaser" style="margin-top:0">制約（強度・加工・コスト・納期・安全・調達）を<b>同時に</b>満たす設計解を出せる人になるまでの道。</div>
+    <button class="cta alt" id="btnTeachNote" style="margin-top:14px">🎓 俺の言葉ノート</button>
     <div class="mapstage" id="mapStage"></div>
     <div class="mapbros">
       <div class="mbTitle">別街道（兄弟アプリ）</div>
@@ -512,9 +695,55 @@
       <a class="mapbroslink" href="https://pasarinobuhito0409-droid.github.io/force-forge/" target="_blank" rel="noopener"><b>FORCE FORGE</b> ── 力学×CAE</a>
       <a class="mapbroslink" href="https://pasarinobuhito0409-droid.github.io/volt-forge/" target="_blank" rel="noopener"><b>VOLT FORGE</b> ── 電気設計</a>
       <a class="mapbroslink" href="https://pasarinobuhito0409-droid.github.io/bend-forge/" target="_blank" rel="noopener"><b>BEND FORGE</b> ── 板金設計</a>
+      <a class="mapbroslink" href="https://pasarinobuhito0409-droid.github.io/coat-forge/" target="_blank" rel="noopener"><b>COAT FORGE</b> ── 塗装</a>
     </div>
   </section>
 
+  <div class="confbox" id="confBox" style="display:none">
+    <div class="confq">自信は？</div>
+    <div class="confrow">
+      <button class="confbtn confYes">💪 自信あり</button>
+      <button class="confbtn confMid">🤔 五分五分</button>
+    </div>
+  </div>
+
+</div>
+
+<!-- 📷 現場の目：本物写真モーダル -->
+<div id="photoModal">
+  <div class="pm-sheet">
+    <button id="pmClose" aria-label="閉じる">✕</button>
+    <div id="pmTitle"></div>
+    <div id="pmFig"></div>
+    <div id="pmCap"></div>
+    <a id="pmVideo" class="pm-video" target="_blank" rel="noopener">▶ 動画で見る（ユーチューブ検索へ）</a>
+    <div id="pmCredit"></div>
+  </div>
+</div>
+
+<!-- 🎓 俺の言葉ノート：モーダル -->
+<div id="teachModal">
+  <div class="tm-sheet">
+    <button id="tmClose" aria-label="閉じる">✕</button>
+    <div id="tmTitle">🎓 俺の言葉ノート</div>
+    <div id="tmList"></div>
+  </div>
+</div>
+
+<!-- 🎰 ご褒美ガチャ：モーダル -->
+<div id="gachaModal">
+  <div class="gm-sheet">
+    <div class="gm-particles" id="gmParticles"></div>
+    <div class="gm-drum" id="gmDrum">⚙</div>
+    <div class="gm-result" id="gmResult">
+      <div class="gm-superfx" id="gmSuperFx"></div>
+      <div class="gmIcon" id="gmIcon">🎁</div>
+      <div class="gmTier" id="gmTier">NORMAL</div>
+      <div class="gmTitle" id="gmTitleTxt"></div>
+      <div class="gmXp" id="gmXpTxt"></div>
+    </div>
+    <button id="gachaCloseBtn">とじる</button>
+  </div>
 </div>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
@@ -963,18 +1192,22 @@ try {
 function saveRQ() {
   try { localStorage.setItem(RQ_KEY, JSON.stringify(reviewQueue)); } catch (e) {}
 }
-function rqUpsert(id, src) {
+/* v2: rqUpsertは自己完結ペイロード（§2.1）。dueNow:true で即時最優先（自信ベット💪不正解用） */
+function rqUpsert(id, payload) {
+  payload = payload || {};
   const now = Date.now();
+  const due = payload.dueNow ? now : now + 86400000;
   let item = reviewQueue.find((r) => r.id === id);
   if (!item) {
-    item = { id, due: now + 86400000, interval: 1, src };
+    item = { id, due, interval: 1, v: 2, q: payload.q, opts: payload.opts, ans: payload.ans, exp: payload.exp, app: "gear", tag: payload.tag || "", kind: payload.kind || "" };
     reviewQueue.push(item);
   } else {
-    item.due = now + 86400000;
-    item.interval = 1;
-    item.src = src;
+    item.due = due; item.interval = 1; item.v = 2;
+    item.q = payload.q; item.opts = payload.opts; item.ans = payload.ans; item.exp = payload.exp;
+    item.tag = payload.tag || item.tag; item.kind = payload.kind || item.kind; item.app = "gear";
   }
   saveRQ();
+  return item;
 }
 function rqAnswer(item, correct) {
   if (correct) {
@@ -991,9 +1224,12 @@ function rqDueList() {
   const now = Date.now();
   return reviewQueue.filter((r) => r.due <= now).slice(0, RQ_DAY_LIMIT);
 }
-/* 復習キューの中身を実データ（クイズ/ボス問題/ドリル）から解決する */
+/* 復習キューの中身を解決する。v2（自己完結ペイロード）優先、旧v1（srcベース）は後方互換で維持 */
 function rqResolveQuestion(item) {
-  const s = item.src || {};
+  if (item && item.v === 2 && item.q) {
+    return { q: item.q, opts: item.opts, ans: item.ans, exp: item.exp, drill: item.kind === "drill" };
+  }
+  const s = (item && item.src) || {};
   if (s.type === "quiz") {
     const L = LESSONS.find((x) => x.id === s.lessonId);
     if (!L) return null;
@@ -1058,6 +1294,366 @@ function setPhase(name) {
 }
 function vib(p) { try { navigator.vibrate && navigator.vibrate(p); } catch (e) {} }
 
+/* ================================================================
+   v2 共有基盤（FORGE_V2.md §2〜§4・forge-factory標準装備）
+================================================================ */
+function readJSON(key, fallback) {
+  try {
+    const raw = localStorage.getItem(key);
+    if (!raw) return fallback;
+    const obj = JSON.parse(raw);
+    return (obj && typeof obj === "object") ? obj : fallback;
+  } catch (e) { return fallback; }
+}
+function writeJSON(key, obj) { try { localStorage.setItem(key, JSON.stringify(obj)); } catch (e) {} }
+function escHTML(s) { return String(s == null ? "" : s).replace(/[&<>]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;" }[c])); }
+
+/* ---- ⚡ FORGEレベル（forge-xp-v1・共有） ---- */
+const XP_KEY = "forge-xp-v1";
+let forgeXP = readJSON(XP_KEY, { xp: 0 });
+if (typeof forgeXP.xp !== "number" || !isFinite(forgeXP.xp)) forgeXP.xp = 0;
+function addXP(n) {
+  if (!n) return;
+  forgeXP.xp = Math.max(0, (forgeXP.xp || 0) + n);
+  writeJSON(XP_KEY, forgeXP);
+  renderXPHeader();
+}
+function forgeLevel() { return 1 + Math.floor((forgeXP.xp || 0) / 120); }
+function renderXPHeader() {
+  const lv = forgeLevel();
+  const inLevel = (forgeXP.xp || 0) % 120;
+  const lvEl = $("xpLv"), barEl = $("xpBar");
+  if (lvEl) lvEl.textContent = "⚡FORGE Lv." + lv;
+  if (barEl) barEl.style.width = Math.round((inLevel / 120) * 100) + "%";
+}
+
+/* ---- 🦠 サビマップ（gear-forge-fresh-v1） ---- */
+const FRESH_KEY = "gear-forge-fresh-v1";
+let freshMap = readJSON(FRESH_KEY, {});
+function saveFresh() { writeJSON(FRESH_KEY, freshMap); }
+function touchFresh(lessonId) {
+  if (!lessonId) return;
+  freshMap[lessonId] = Date.now();
+  saveFresh();
+}
+function rustLevelFor(lessonId) {
+  if (!progress.done[lessonId]) return ""; /* 未クリアはサビ対象外（ロック表示のまま） */
+  const t = freshMap[lessonId];
+  if (!t) return "";
+  const days = (Date.now() - t) / 86400000;
+  if (days < 3) return "fresh";
+  if (days < 10) return "";
+  if (days < 21) return "dull";
+  if (days < 45) return "rust1";
+  return "rust2";
+}
+/* 既存ユーザーの旧データ対策：v2導入前にクリア済みのレッスンをいきなり錆びさせない（初回だけ今の時刻で埋める） */
+(function backfillFresh() {
+  let changed = false;
+  LESSONS.forEach((L) => {
+    if (progress.done[L.id] && !freshMap[L.id]) { freshMap[L.id] = Date.now(); changed = true; }
+  });
+  if (changed) saveFresh();
+})();
+/* ドリルtag→レッスン対応表（DESIGN_V2.md D4）。DRILLSのtag接頭辞(かっこ内)から機械的に定義 */
+const DRILL_TAG_LESSON = { zumen: "l2", kousa: "l3", hameai: "l4", neji: "l5", youso: "l6" };
+function lessonIdForDrillTag(tag) {
+  const m = /\(([a-z]+)\)/.exec(tag || "");
+  return m ? DRILL_TAG_LESSON[m[1]] : null;
+}
+
+/* ---- 🎯 自信ベット（forge-conf-v1・共有・全設問で共通利用） ---- */
+const CONF_KEY = "forge-conf-v1";
+let confState = readJSON(CONF_KEY, { hits: [] });
+if (!Array.isArray(confState.hits)) confState.hits = [];
+function saveConf() { writeJSON(CONF_KEY, confState); }
+function confPush(hit) {
+  confState.hits.push(hit ? 1 : 0);
+  if (confState.hits.length > 40) confState.hits = confState.hits.slice(-40);
+  saveConf();
+}
+function confAccuracyPct() {
+  const h = confState.hits;
+  if (h.length < 10) return null;
+  const s = h.reduce((a, b) => a + b, 0);
+  return Math.round((s / h.length) * 100);
+}
+function renderCalMeter() {
+  const el = $("calMeter");
+  if (!el) return;
+  const pct = confAccuracyPct();
+  el.textContent = "🎯 自信の精度 " + (pct === null ? "計測中" : pct + "%");
+}
+/* 自信ベットUI（1関数に共通化・コピペ5箇所禁止）：afterElの直後にチップを差し込みcb(conf)へ結果を渡す */
+function askConfidence(afterEl, cb) {
+  const box = $("confBox");
+  if (!box || !afterEl) { cb("mid"); return; }
+  box.style.display = "block";
+  afterEl.insertAdjacentElement("afterend", box);
+  const yes = box.querySelector(".confYes"), mid = box.querySelector(".confMid");
+  yes.onclick = () => { box.style.display = "none"; cb("strong"); };
+  mid.onclick = () => { box.style.display = "none"; cb("mid"); };
+}
+/* 自信×正誤からXPを算出（§3.2配点）。💪のみconf履歴に記録する */
+function applyConfidenceXP(correct, conf) {
+  if (conf === "strong") { confPush(correct); return correct ? 3 : 0; }
+  return correct ? 2 : 1;
+}
+function confBadgeHTML(conf, correct) {
+  if (conf === "strong" && !correct) return '<div class="confbadge miss">過信サビ⚠ ここが一番伸びる場所</div>';
+  if (conf === "strong" && correct) return '<div class="confbadge hit">💪的中！ +3XP</div>';
+  if (conf === "mid" && correct) return '<div class="confbadge hit">🤔正解 +2XP</div>';
+  return '<div class="confbadge miss">🤔挑戦賞 +1XP</div>';
+}
+
+/* ---- 🎓 教えるモード（forge-teach-v1・共有） ---- */
+const TEACH_KEY = "forge-teach-v1";
+let teachNotes = readJSON(TEACH_KEY, []);
+if (!Array.isArray(teachNotes)) teachNotes = [];
+function saveTeach() { writeJSON(TEACH_KEY, teachNotes); }
+function addTeachNote(lessonId, txt) {
+  const t = (txt || "").trim();
+  if (!t) return false;
+  teachNotes.push({ app: "gear", lesson: lessonId, txt: t, ts: Date.now() });
+  if (teachNotes.length > 200) teachNotes = teachNotes.slice(-200);
+  saveTeach();
+  addXP(5);
+  return true;
+}
+function findTeachNote(app, lessonId) {
+  if (!lessonId) return null;
+  for (let i = teachNotes.length - 1; i >= 0; i--) {
+    const n = teachNotes[i];
+    if (n && n.app === app && n.lesson === lessonId) return n;
+  }
+  return null;
+}
+function teachEchoHTML(app, lessonId) {
+  const n = findTeachNote(app, lessonId);
+  if (!n) return "";
+  return '<div class="teachecho">🎓 あの日の俺：『' + escHTML(n.txt) + "』</div>";
+}
+const APP_META = {
+  arc: { emoji: "⚡", name: "ARC" }, force: { emoji: "🔧", name: "FORCE" }, volt: { emoji: "💡", name: "VOLT" },
+  bend: { emoji: "📐", name: "BEND" }, gear: { emoji: "⚙", name: "GEAR" }, coat: { emoji: "🎨", name: "COAT" }
+};
+function renderTeachModal() {
+  const wrap = $("tmList");
+  if (!wrap) return;
+  const rows = teachNotes.slice().sort((a, b) => b.ts - a.ts);
+  if (!rows.length) { wrap.innerHTML = '<div class="tmEmpty">まだ何も書いていない。<br>レッスンをクリアして新人に教えてみよう。</div>'; return; }
+  wrap.innerHTML = rows.map((n) => {
+    const meta = APP_META[n.app] || { emoji: "❔", name: n.app };
+    const d = new Date(n.ts);
+    const dateStr = d.getFullYear() + "/" + (d.getMonth() + 1) + "/" + d.getDate();
+    return '<div class="tmItem"><div class="tmMeta">' + meta.emoji + " " + meta.name + " ── " + escHTML(n.lesson) + " ── " + dateStr + '</div><div class="tmTxt">' + escHTML(n.txt) + "</div></div>";
+  }).join("");
+}
+$("btnTeachNote").addEventListener("click", () => { renderTeachModal(); $("teachModal").style.display = "flex"; });
+$("tmClose").addEventListener("click", () => { $("teachModal").style.display = "none"; });
+$("teachModal").addEventListener("click", (e) => { if (e.target === $("teachModal")) $("teachModal").style.display = "none"; });
+
+/* ---- 🎰 ご褒美ガチャ＋称号（forge-titles-v1・共有） ---- */
+const TITLES_KEY = "forge-titles-v1";
+let myTitles = readJSON(TITLES_KEY, []);
+if (!Array.isArray(myTitles)) myTitles = [];
+function saveTitles() { writeJSON(TITLES_KEY, myTitles); }
+function ownTitle(id) { return myTitles.some((t) => t.id === id); }
+function grantTitle(id, name) {
+  if (ownTitle(id)) return false;
+  myTitles.push({ id, name, app: "gear", ts: Date.now() });
+  saveTitles();
+  return true;
+}
+const GEAR_BASIC_TITLE = { id: "gear-basic", name: "歯車の見習い" };
+const GEAR_SUPER_TITLE = { id: "gear-super", name: "機構神" };
+const GENERIC_RARE_TITLES = [
+  { id: "generic-asakaji", name: "朝の鍛冶屋" },
+  { id: "generic-kotsukotsu", name: "コツコツの鬼" },
+  { id: "generic-sabiotoshi", name: "サビ落とし職人" },
+  { id: "generic-zumen", name: "図面の虫" },
+  { id: "generic-genba", name: "現場の目利き" }
+];
+const ALL_TITLES_SHELF = [GEAR_BASIC_TITLE].concat(GENERIC_RARE_TITLES, [GEAR_SUPER_TITLE]);
+function renderTitleShelf() {
+  const wrap = $("titleShelf");
+  if (!wrap) return;
+  wrap.innerHTML = ALL_TITLES_SHELF.map((t) => {
+    const owned = ownTitle(t.id);
+    const tier = t === GEAR_SUPER_TITLE ? "gold" : (t === GEAR_BASIC_TITLE ? "" : "silver");
+    return '<div class="tsItem ' + (owned ? tier : "locked") + '"><div class="tsIcon">' + (owned ? (t === GEAR_SUPER_TITLE ? "👑" : "🏅") : "❔") + '</div><div class="tsName">' + (owned ? escHTML(t.name) : "？？？") + "</div></div>";
+  }).join("");
+}
+const REPAINT_COUNT_KEY = "gear-forge-repaintcount-v1";
+let repaintCounter = readJSON(REPAINT_COUNT_KEY, { n: 0 });
+function saveRepaintCounter() { writeJSON(REPAINT_COUNT_KEY, repaintCounter); }
+function rollGacha(isBoss) {
+  const rareP = isBoss ? 0.32 : 0.16;
+  const superP = isBoss ? 0.08 : 0.04;
+  const r = Math.random();
+  if (r < superP) return "super";
+  if (r < superP + rareP) return "rare";
+  return "normal";
+}
+function buildSuperGachaFX() {
+  /* D3: 金の歯車列が順にかみ合って回り出し、最後に光の輪が走る（GEARオリジナル・2秒） */
+  const fx = $("gmSuperFx");
+  if (!fx) return;
+  let html = "";
+  for (let i = 0; i < 5; i++) {
+    html += '<div style="position:absolute;left:' + (10 + i * 18) + '%;top:38%;font-size:' + (22 + (i % 2) * 8) + 'px;' +
+      "animation:gearspin" + (i % 2 === 0 ? "cw" : "ccw") + " " + (0.6 + i * 0.08) + "s linear infinite;" +
+      'filter:drop-shadow(0 0 8px rgba(255,214,79,0.9));">⚙</div>';
+  }
+  html += '<div style="position:absolute;inset:6px;border-radius:50%;border:3px solid rgba(255,214,79,0.9);animation:gmring 2s ease-out;"></div>';
+  fx.innerHTML = html;
+}
+/* 分野色（青#7fb8ff／紫#a07bff、超レアは金#ffd64f混じり）のパーティクル噴出（§3.5） */
+function burstGachaParticles(tier) {
+  const wrap = $("gmParticles");
+  if (!wrap) return;
+  const colors = tier === "super" ? ["#ffd64f", "#7fb8ff", "#a07bff"] : ["#7fb8ff", "#a07bff"];
+  const n = tier === "super" ? 22 : tier === "rare" ? 16 : 10;
+  let html = "";
+  for (let i = 0; i < n; i++) {
+    const ang = Math.random() * Math.PI * 2;
+    const dist = 60 + Math.random() * 110;
+    const dx = Math.cos(ang) * dist, dy = Math.sin(ang) * dist;
+    const c = colors[(Math.random() * colors.length) | 0];
+    html += '<span style="--dx:' + dx.toFixed(0) + "px;--dy:" + dy.toFixed(0) + "px;background:" + c +
+      ";box-shadow:0 0 8px " + c + ";animation-delay:" + (Math.random() * 0.15).toFixed(2) + 's"></span>';
+  }
+  wrap.innerHTML = html;
+  setTimeout(() => { if (wrap) wrap.innerHTML = ""; }, 1300);
+}
+function openGacha(tier, opts) {
+  opts = opts || {};
+  const modal = $("gachaModal");
+  const drum = $("gmDrum"), result = $("gmResult"), closeBtn = $("gachaCloseBtn");
+  if (!modal) return;
+  result.style.display = "none";
+  result.className = "gm-result";
+  closeBtn.style.display = "none";
+  drum.style.display = "block";
+  $("gmSuperFx").innerHTML = "";
+  $("gmParticles").innerHTML = "";
+  modal.style.display = "flex";
+  vib(10);
+  setTimeout(() => {
+    drum.style.display = "none";
+    result.classList.add(tier);
+    result.style.display = "block";
+    closeBtn.style.display = "block";
+    burstGachaParticles(tier);
+    let name = "", isNew = false;
+    if (tier === "super") {
+      isNew = grantTitle(GEAR_SUPER_TITLE.id, GEAR_SUPER_TITLE.name);
+      name = GEAR_SUPER_TITLE.name;
+      $("gmIcon").textContent = "👑";
+      $("gmTier").textContent = "⭐ 超レア ⭐";
+      buildSuperGachaFX();
+      vib([30, 30, 30, 30, 80]);
+    } else if (tier === "rare") {
+      const pick = GENERIC_RARE_TITLES[(Math.random() * GENERIC_RARE_TITLES.length) | 0];
+      isNew = grantTitle(pick.id, pick.name);
+      name = pick.name;
+      $("gmIcon").textContent = "🥈";
+      $("gmTier").textContent = "レア";
+      vib([20, 30, 40]);
+    } else {
+      $("gmIcon").textContent = "🎁";
+      $("gmTier").textContent = "いつものスタンプ";
+      vib(15);
+    }
+    $("gmTitleTxt").textContent = tier === "normal" ? "また明日" : ("称号「" + name + "」" + (isNew ? "獲得！" : "（すでに獲得済み）"));
+    $("gmXpTxt").textContent = opts.xpLine || "";
+    renderTitleShelf();
+  }, 800);
+}
+$("gachaCloseBtn").addEventListener("click", () => { $("gachaModal").style.display = "none"; });
+
+/* ---- 🔀 FORGE DAILY（forge-daily-v1・共有／兄弟rq-v1の読み取りのみ） ---- */
+const DAILY_KEY = "forge-daily-v1";
+const SIBLING_APPS = [
+  { key: "arc", rq: "arc-forge-rq-v1" },
+  { key: "force", rq: "force-forge-rq-v1" },
+  { key: "volt", rq: "volt-forge-rq-v1" },
+  { key: "bend", rq: "bend-forge-rq-v1" },
+  { key: "coat", rq: "coat-forge-rq-v1" },
+  { key: "gear", rq: "gear-forge-rq-v1" }
+];
+function todayStr() { const d = new Date(); return d.getFullYear() + "-" + String(d.getMonth() + 1).padStart(2, "0") + "-" + String(d.getDate()).padStart(2, "0"); }
+function dailyDoneToday() { return readJSON(DAILY_KEY, { date: "" }).date === todayStr(); }
+function collectDailyCandidates() {
+  const now = Date.now();
+  const perApp = {};
+  SIBLING_APPS.forEach((a) => {
+    let list = [];
+    try {
+      const raw = a.key === "gear" ? JSON.stringify(reviewQueue) : localStorage.getItem(a.rq);
+      if (raw) {
+        const arr = JSON.parse(raw);
+        if (Array.isArray(arr)) list = arr.filter((it) => it && it.v === 2 && typeof it.due === "number" && it.due <= now && it.q && Array.isArray(it.opts));
+      }
+    } catch (e) { list = []; }
+    list.sort((x, y) => x.due - y.due); /* dueが古い＝超過日数が大きいもの優先 */
+    perApp[a.key] = list;
+  });
+  return perApp;
+}
+function pickDailySet() {
+  const perApp = collectDailyCandidates();
+  const order = SIBLING_APPS.map((a) => a.key);
+  const picked = [];
+  let round = 0;
+  while (picked.length < 5 && round < 20) {
+    let any = false;
+    for (const k of order) {
+      const q = perApp[k];
+      if (q && q[round]) { picked.push({ app: k, item: q[round] }); any = true; if (picked.length >= 5) break; }
+    }
+    if (!any) break;
+    round++;
+  }
+  return picked;
+}
+function renderDailyCard() {
+  const btn = $("btnDaily");
+  if (!btn) return;
+  if (dailyDoneToday()) { btn.style.display = "none"; return; }
+  const set = pickDailySet();
+  if (set.length < 2) { btn.style.display = "none"; return; }
+  btn.style.display = "block";
+  $("dailySub").textContent = set.length + "問・家族の復習を交ぜて出題";
+  btn.onclick = openDaily;
+}
+function writeBackDaily(appKey, itemId, correct, forceNow) {
+  const meta = SIBLING_APPS.find((a) => a.key === appKey);
+  if (!meta) return;
+  try {
+    if (appKey === "gear") {
+      const item = reviewQueue.find((r) => r.id === itemId);
+      if (item) { rqAnswer(item, correct); if (forceNow) { item.due = Date.now(); saveRQ(); } }
+      return;
+    }
+    const raw = localStorage.getItem(meta.rq);
+    if (!raw) return;
+    const arr = JSON.parse(raw);
+    if (!Array.isArray(arr)) return;
+    const item = arr.find((r) => r && r.id === itemId);
+    if (!item) return;
+    if (correct) {
+      const IV = [1, 3, 7, 18, 45, 112];
+      const idx2 = IV.indexOf(item.interval);
+      item.interval = idx2 >= 0 && idx2 < IV.length - 1 ? IV[idx2 + 1] : Math.round((item.interval || 1) * 2.5);
+    } else {
+      item.interval = 1;
+    }
+    item.due = forceNow ? Date.now() : Date.now() + item.interval * 86400000;
+    localStorage.setItem(meta.rq, JSON.stringify(arr));
+  } catch (e) { /* 壊れた兄弟JSONでも黙ってスキップ */ }
+}
+
 /* ---------------- ホーム描画 ---------------- */
 function lessonState(i) {
   const isBoss = i >= LESSONS.length;
@@ -1077,11 +1673,18 @@ function renderHome() {
   const labels = LESSONS.map((L) => L.label).concat(["ボス"]);
   for (let i = 0; i < labels.length; i++) {
     const st = lessonState(i);
+    const rustCls = i < LESSONS.length ? rustLevelFor(LESSONS[i].id) : "";
     const b = document.createElement("button");
-    b.className = "node " + st;
+    b.className = "node " + st + (rustCls ? " " + rustCls : "");
     const face = i < LESSONS.length ? LESSONS[i].tag.replace("L", "") : "★";
-    b.innerHTML = '<div class="dot">' + (st === "done" ? "✓" : face) + '</div><div class="lbl">' + labels[i] + "</div>";
-    if (st !== "lock") b.addEventListener("click", () => (i < LESSONS.length ? openLesson(i) : openBoss()));
+    const rustChipHtml = rustCls === "rust2" ? '<div class="rustchip">🦠再塗装しろ</div>' : "";
+    b.innerHTML = '<div class="dot">' + (st === "done" ? "✓" : face) + '</div><div class="lbl">' + labels[i] + "</div>" + rustChipHtml;
+    if (st !== "lock") {
+      b.addEventListener("click", () => {
+        if (i < LESSONS.length && (rustCls === "rust1" || rustCls === "rust2")) { openRepaint(LESSONS[i].id); return; }
+        i < LESSONS.length ? openLesson(i) : openBoss();
+      });
+    }
     wrap.appendChild(b);
   }
   const count = clearedCount();
@@ -1115,6 +1718,63 @@ function renderHome() {
   }
 
   renderGearHero(count);
+  renderXPHeader();
+  renderTitleShelf();
+  renderDailyCard();
+  renderRustSummary();
+  renderPassport();
+  renderCalMeter();
+}
+
+/* v2: 錆サマリーチップ。タップで一番錆びたレッスンの再塗装を開く */
+function renderRustSummary() {
+  const btn = $("btnRustSummary");
+  if (!btn) return;
+  const rustLessons = LESSONS.filter((L) => { const r = rustLevelFor(L.id); return r === "rust1" || r === "rust2"; });
+  if (!rustLessons.length) { btn.style.display = "none"; return; }
+  btn.style.display = "block";
+  $("rustCount").textContent = rustLessons.length;
+  btn.onclick = () => {
+    const worst = rustLessons.find((L) => rustLevelFor(L.id) === "rust2") || rustLessons[0];
+    openRepaint(worst.id);
+  };
+}
+
+/* ================================================================
+   🛂 FORGE PASSPORT（兄弟5アプリ＝ARC/FORCE/VOLT/BEND/COATの進捗を1画面に）
+================================================================ */
+const PASSPORT_APPS = [
+  { key: "arc", emoji: "⚡", name: "ARC", store: "arc-forge-v2", total: 7, url: "https://pasarinobuhito0409-droid.github.io/arc-forge/" },
+  { key: "force", emoji: "🔧", name: "FORCE", store: "force-forge-v1", total: 7, url: "https://pasarinobuhito0409-droid.github.io/force-forge/" },
+  { key: "volt", emoji: "💡", name: "VOLT", store: "volt-forge-v1", total: 7, url: "https://pasarinobuhito0409-droid.github.io/volt-forge/" },
+  { key: "bend", emoji: "📐", name: "BEND", store: "bend-forge-v1", total: 7, url: "https://pasarinobuhito0409-droid.github.io/bend-forge/" },
+  { key: "coat", emoji: "🎨", name: "COAT", store: "coat-forge-v1", total: 7, url: "https://pasarinobuhito0409-droid.github.io/coat-forge/" }
+];
+function passportReadPct(app) {
+  try {
+    const raw = localStorage.getItem(app.store);
+    if (!raw) return null;
+    const obj = JSON.parse(raw);
+    const done = obj && obj.done ? obj.done : null;
+    if (!done || typeof done !== "object") return null;
+    const n = Object.keys(done).filter((k) => done[k]).length;
+    return Math.max(0, Math.min(100, Math.round((n / app.total) * 100)));
+  } catch (e) { return null; }
+}
+function renderPassport() {
+  const wrap = $("passportBadges");
+  if (!wrap) return;
+  wrap.innerHTML = '<div class="pbadge pblv"><div class="pbemoji">⚡</div><div class="pbname">Lv</div><div class="pbpct" id="passportLv">Lv.' + forgeLevel() + "</div></div>";
+  PASSPORT_APPS.forEach((app) => {
+    let pct = null;
+    try { pct = passportReadPct(app); } catch (e) { pct = null; }
+    const a = document.createElement("a");
+    a.className = "pbadge";
+    a.href = app.url; a.target = "_blank"; a.rel = "noopener";
+    const pctText = pct === null ? "—" : pct + "%";
+    a.innerHTML = '<div class="pbemoji">' + app.emoji + '</div><div class="pbname">' + app.name + '</div><div class="pbpct">' + pctText + '</div><div class="pbbar"><div style="width:' + (pct || 0) + '%"></div></div>';
+    wrap.appendChild(a);
+  });
 }
 
 /* ================================================================
@@ -2509,6 +3169,8 @@ function openLesson(i) {
   curIdx = i;
   cur = LESSONS[i];
   missionPick = -1;
+  microActive = false;
+  $("btnAtomic").textContent = "🔬 接触の目";
   showView("viewLesson");
   $("lsTag").textContent = cur.tag;
   $("lsTitle").textContent = cur.title;
@@ -2545,6 +3207,9 @@ function startExp() {
   setExtraHTML("");
   $("loadRange").value = 0;
   $("loadVal").textContent = cur.val(0);
+  microActive = false;
+  $("btnAtomic").textContent = "🔬 接触の目";
+  $("btnPhoto").style.display = PHOTOS[cur.id] ? "" : "none";
   const btn = $("btnToReveal");
   btn.disabled = true;
   ensureStage();
@@ -2555,23 +3220,221 @@ function startExp() {
   ST.resize();
 }
 
-/* 📐図面の目：カメラスナップ＋方眼＋3面ビュー表示（正面→上→横×3周で自動復帰） */
+/* 📐図面の目：カメラスナップ＋方眼＋3面ビュー表示（正面→上→横×3周で自動復帰・既存装備） */
 $("btnMicro").addEventListener("click", () => {
   if (!ST || ST.fake) return;
   vib(10);
   ST.toggleBlueprint();
 });
 
+/* ================================================================
+   🔬接触の目（buildMicroScene新設・機械設計オリジナル・DESIGN_V2.md D1）
+   モード対応表（既存LESSONSを読んで実装者が定義）：
+     l1(締結=ねじジャッキが主役)→bolt／l2(図面→実体化する接触面の代表例)→mesh／
+     l3(公差が接触品質を決める)→mesh／l4(はめあい=すきま・油膜の関係)→lube／
+     l5(ネジそのもの)→bolt／l6(歯車・軸受のかみ合い)→mesh
+================================================================ */
+const MICRO_MODE = { l1: "bolt", l2: "mesh", l3: "mesh", l4: "lube", l5: "bolt", l6: "mesh" };
+let microActive = false;
+function buildMicroScene(lessonId) {
+  const mode = MICRO_MODE[lessonId] || "mesh";
+  const sphGeo = new THREE.SphereGeometry(1, 10, 8);
+  const mkBall = (r, mat) => { const m = new THREE.Mesh(sphGeo, mat); m.scale.setScalar(r); return m; };
+  const feMat = new THREE.MeshStandardMaterial({ color: 0x9aa2ad, metalness: 0.9, roughness: 0.35 });
+  const feMat2 = new THREE.MeshStandardMaterial({ color: 0xb8c2cc, metalness: 0.9, roughness: 0.3 });
+  const oilMat = new THREE.MeshStandardMaterial({ color: 0xffd64f, roughness: 0.25, emissive: 0x664a08, emissiveIntensity: 0.55, transparent: true, opacity: 0.9 });
+
+  if (mode === "mesh") {
+    /* かみ合い系：2つの歯面の原子格子が接触点で押し合う。接触楕円の圧力分布を色で見せる（ヘルツ接触のイメージ） */
+    const rows = 4, cols = 12;
+    const gridA = [], gridB = [];
+    for (let r = 0; r < rows; r++) for (let c = 0; c < cols; c++) {
+      const a = mkBall(0.075, feMat.clone());
+      a.position.set(-1.1 + c * 0.2, -0.05 - r * 0.16, 0);
+      ST.group.add(a); gridA.push(a);
+      const b = mkBall(0.075, feMat2.clone());
+      b.position.set(-1.1 + c * 0.2, 0.05 + r * 0.16, 0);
+      ST.group.add(b); gridB.push(b);
+    }
+    setChips('<div class="chip" style="left:6%; top:8%">⚙ 上下の玉＝歯面の原子格子</div>' +
+             '<div class="chip" style="right:5%; top:26%">🔴 赤＝接触点の圧力（ヘルツ接触のイメージ）</div>' +
+             '<div class="chip" style="left:6%; top:86%">※分子イメージ図</div>');
+    ST.setView(0, 0.1, 3.6);
+    let t2 = 0;
+    ST.sceneApi = { tick(dt) {
+      t2 += dt;
+      const gap = 0.12 + Math.sin(t2 * 0.6) * 0.09;
+      gridA.forEach((a, i) => { a.position.y = -0.05 - Math.floor(i / cols) * 0.16 + gap * 0.02; });
+      gridB.forEach((b, i) => {
+        const col = i % cols;
+        const dx = Math.abs(col - cols / 2) / (cols / 2);
+        const press = Math.max(0, 1 - dx * 1.3) * Math.max(0, 1 - gap * 4);
+        b.position.y = 0.05 + Math.floor(i / cols) * 0.16 - gap * 0.02;
+        b.material.color.lerp(tc().setHex(press > 0.15 ? 0xff5d4d : 0xb8c2cc), 0.15);
+        b.material.emissiveIntensity = press * 0.7;
+      });
+    } };
+  } else if (mode === "lube") {
+    /* 潤滑・摩耗系：油膜分子が2面の間に入り接触を防ぐ。油膜が切れると原子同士が引きちぎれる＝摩耗の正体 */
+    const rows = 3, cols = 10;
+    const gridA = [], gridB = [], oils = [];
+    for (let r = 0; r < rows; r++) for (let c = 0; c < cols; c++) {
+      const a = mkBall(0.07, feMat.clone());
+      a.position.set(-1.0 + c * 0.2, -0.28 - r * 0.15, 0);
+      ST.group.add(a); gridA.push(a);
+      const b = mkBall(0.07, feMat2.clone());
+      b.position.set(-1.0 + c * 0.2, 0.28 + r * 0.15, 0);
+      ST.group.add(b); gridB.push(b);
+    }
+    for (let i = 0; i < 30; i++) {
+      const o = mkBall(0.045, oilMat.clone());
+      o.position.set(-1.0 + Math.random() * 2.0, (Math.random() - 0.5) * 0.4, (Math.random() - 0.5) * 0.3);
+      ST.group.add(o); oils.push({ mesh: o, vx: (Math.random() - 0.5) * 0.4 });
+    }
+    setChips('<div class="chip" style="left:6%; top:8%">🟡 黄の玉＝油膜の分子（すきまばめの隙間）</div>' +
+             '<div class="chip" style="right:5%; top:26%">⚠ 油膜が切れると原子同士が引きちぎれる＝摩耗</div>' +
+             '<div class="chip" style="left:6%; top:86%">※分子イメージ図</div>');
+    ST.setView(0, 0.08, 3.6);
+    let t2 = 0;
+    ST.sceneApi = { tick(dt) {
+      t2 += dt;
+      const cyc = (t2 % 6) / 6;
+      const filmOk = cyc < 0.7;
+      oils.forEach((o) => {
+        o.mesh.position.x += o.vx * dt;
+        if (o.mesh.position.x > 1.1) o.mesh.position.x = -1.1;
+        if (o.mesh.position.x < -1.1) o.mesh.position.x = 1.1;
+        o.mesh.material.opacity = filmOk ? 0.9 : Math.max(0, 0.9 - (cyc - 0.7) / 0.3);
+      });
+      const squeeze = filmOk ? 0 : Math.min(1, (cyc - 0.7) / 0.3);
+      gridA.forEach((a, i) => { a.position.y = -0.28 - Math.floor(i / cols) * 0.15 + squeeze * 0.22; });
+      gridB.forEach((b, i) => {
+        b.position.y = 0.28 + Math.floor(i / cols) * 0.15 - squeeze * 0.22;
+        b.material.emissive.setHex(squeeze > 0.5 ? 0x661a12 : 0x000000);
+        b.material.emissiveIntensity = squeeze > 0.5 ? 0.5 : 0;
+      });
+    } };
+  } else {
+    /* 締結系：ボルトの軸の原子格子が伸びる（ばね）＝締結力そのもの */
+    const N = 9;
+    const atoms = [];
+    for (let i = 0; i < N; i++) {
+      const a = mkBall(0.09, feMat.clone());
+      a.position.set(0, -0.9 + i * 0.22, 0);
+      ST.group.add(a); atoms.push(a);
+    }
+    const bondGeo = new THREE.BufferGeometry();
+    const bondPos = new Float32Array((N - 1) * 6);
+    bondGeo.setAttribute("position", new THREE.BufferAttribute(bondPos, 3));
+    const bonds = new THREE.LineSegments(bondGeo, new THREE.LineBasicMaterial({ color: 0xffd64f, transparent: true, opacity: 0.85 }));
+    ST.group.add(bonds);
+    setChips('<div class="chip" style="left:6%; top:8%">⚙ 玉の連なり＝ボルト軸の原子格子</div>' +
+             '<div class="chip" style="right:5%; top:26%">🔴 伸び＝締結力そのもの（軸力）</div>' +
+             '<div class="chip" style="left:6%; top:86%">※分子イメージ図</div>');
+    ST.setView(0, 0.05, 3.6);
+    let t2 = 0;
+    ST.sceneApi = { tick(dt) {
+      t2 += dt;
+      const stretch = 0.3 + Math.sin(t2 * 0.5) * 0.28;
+      for (let i = 0; i < N; i++) {
+        atoms[i].position.y = -0.9 + i * (0.22 + stretch * 0.02);
+        atoms[i].material.color.lerp(tc().setHex(stretch > 0.4 ? 0xff5d4d : 0x9aa2ad), 0.1);
+      }
+      for (let i = 0; i < N - 1; i++) {
+        const p0 = atoms[i].position, p1 = atoms[i + 1].position;
+        bondPos[i * 6] = p0.x; bondPos[i * 6 + 1] = p0.y; bondPos[i * 6 + 2] = p0.z;
+        bondPos[i * 6 + 3] = p1.x; bondPos[i * 6 + 4] = p1.y; bondPos[i * 6 + 5] = p1.z;
+      }
+      bondGeo.attributes.position.needsUpdate = true;
+    } };
+  }
+}
+$("btnAtomic").addEventListener("click", () => {
+  if (!ST || ST.fake || !cur) return;
+  vib(10);
+  microActive = !microActive;
+  const btn = $("btnAtomic");
+  if (microActive) {
+    if (ST.stopBlueprint) ST.stopBlueprint();
+    btn.textContent = "🔬 実験にもどる";
+    ST.clearScene();
+    ST.resetView();
+    buildMicroScene(cur.id);
+    ST.resize();
+  } else {
+    btn.textContent = "🔬 接触の目";
+    ST.clearScene();
+    ST.resetView();
+    BUILDERS[cur.id]();
+    onLoadInput();
+    ST.resize();
+  }
+});
+
+/* ================================================================
+   📷 現場の目（DESIGN_V2.md D2・実物写真＋動くラベル＋動画リンク）
+   写真はウィキメディア・コモンズの自由ライセンス素材（クレジット表示は削らない）
+================================================================ */
+const PHOTOS = {
+  l1: { img: "assets/photo/g1.jpg", title: "実物のサーボ減速機",
+    cap: "中に遊星歯車がぎっしり。モーターの「速さ」をトルク（回す力）に変える力の変換器。",
+    points: [{ x: 50, y: 30, t: "出力軸＝キー溝でトルク伝達" }],
+    credit: "写真: Tandler（CC BY-SA 3.0 de／Wikimedia Commons）", vq: "減速機 遊星歯車 仕組み" },
+  l3: { img: "assets/photo/g2.jpg", title: "ベアリングの球",
+    cap: "セラミック製の転動体。驚異の真球度が「転がり」を作り、摩擦をすべりの1/100にする。",
+    points: [{ x: 50, y: 50, t: "真球＝点接触で転がる" }],
+    credit: "写真: Lucasbosch（CC BY-SA 3.0／Wikimedia Commons）", vq: "ベアリング 仕組み 精度" },
+  l4: { img: "assets/photo/g3.jpg", title: "ノギスで測る",
+    cap: "設計寸法は測れて初めて品質になる。内径はジョウ（爪）の内側で測る。",
+    points: [{ x: 50, y: 45, t: "ジョウ＝内径を測る爪" }],
+    credit: "写真: Rhetos（CC0／Wikimedia Commons）", vq: "ノギス 使い方 測定" },
+  l5: { img: "assets/photo/g4.jpg", title: "トルクレンチ",
+    cap: "ボルトは「締めた力」でなく「軸の伸び」で締結する。規定トルクは設計値──勘で締めるものじゃない。",
+    points: [{ x: 50, y: 50, t: "設定トルクでカチッと知らせる" }],
+    credit: "写真: Doug butler（CC BY-SA 4.0／Wikimedia Commons）", vq: "トルクレンチ ボルト 締め付け" }
+};
+function openPhoto() {
+  const P = cur ? PHOTOS[cur.id] : null;
+  if (!P) return;
+  vib(10);
+  $("pmTitle").textContent = "📷 " + P.title;
+  $("pmCap").textContent = P.cap;
+  $("pmCredit").textContent = P.credit;
+  const fig = $("pmFig");
+  fig.innerHTML = "";
+  const img = document.createElement("img");
+  img.src = P.img; img.alt = P.title;
+  fig.appendChild(img);
+  P.points.forEach((pt, i) => {
+    const m = document.createElement("div");
+    m.className = "pm-marker";
+    m.style.left = pt.x + "%"; m.style.top = pt.y + "%";
+    const dot = document.createElement("span");
+    dot.className = "pm-dot"; dot.style.animationDelay = (i * 0.5) + "s";
+    const lab = document.createElement("span");
+    lab.className = "pm-label"; lab.textContent = pt.t;
+    m.appendChild(dot); m.appendChild(lab);
+    fig.appendChild(m);
+  });
+  $("pmVideo").href = "https://www.youtube.com/results?search_query=" + encodeURIComponent(P.vq);
+  $("photoModal").style.display = "flex";
+}
+$("btnPhoto").addEventListener("click", openPhoto);
+$("pmClose").addEventListener("click", () => { $("photoModal").style.display = "none"; });
+$("photoModal").addEventListener("click", (e) => { if (e.target === $("photoModal")) $("photoModal").style.display = "none"; });
+
 function onLoadInput() {
   const v = +$("loadRange").value;
   $("loadVal").textContent = cur ? cur.val(v) : v;
-  if (ST && !ST.fake && ST.sceneApi && ST.sceneApi.update) ST.sceneApi.update(v / 100);
+  if (ST && !ST.fake && !microActive && ST.sceneApi && ST.sceneApi.update) ST.sceneApi.update(v / 100);
   $("btnToReveal").disabled = false;
 }
 $("loadRange").addEventListener("input", onLoadInput);
 
 $("btnToReveal").addEventListener("click", () => {
   if (ST && ST.stopBlueprint) ST.stopBlueprint();
+  microActive = false;
+  $("btnAtomic").textContent = "🔬 接触の目";
   const m = cur.mission;
   const hit = missionPick === m.ans;
   $("rvBanner").innerHTML = (hit ? "🎯 予想的中！" : "💡 実験で見えたね！") + "<small>こたえ：" + m.ansLine + "</small>";
@@ -2607,19 +3470,25 @@ function startQuiz() {
     b.addEventListener("click", () => {
       if (answered) return;
       answered = true;
+      wrap.querySelectorAll(".opt").forEach((x) => (x.disabled = true));
       const correct = idx === qz.ans;
-      wrap.querySelectorAll(".opt").forEach((x, xi) => {
-        if (xi === qz.ans) x.classList.add("correct");
-        else if (xi === idx) x.classList.add("wrong");
-        else x.classList.add("dim");
+      askConfidence(wrap, (conf) => {
+        addXP(applyConfidenceXP(correct, conf));
+        wrap.querySelectorAll(".opt").forEach((x, xi) => {
+          if (xi === qz.ans) x.classList.add("correct");
+          else if (xi === idx) x.classList.add("wrong");
+          else x.classList.add("dim");
+        });
+        $("qzExp").innerHTML = qz.exp + confBadgeHTML(conf, correct) + teachEchoHTML("gear", cur.id);
+        $("qzExp").style.display = "block";
+        $("btnQuizDone").style.display = "block";
+        /* B2分散学習：クリア済みミニクイズは復習キュー登録対象（間違えた時は即登録）。正解時はサビマップを再塗装 */
+        if (correct) {
+          touchFresh(cur.id);
+        } else {
+          rqUpsert("quiz-" + cur.id, { q: qz.q, opts: qz.opts, ans: qz.ans, exp: qz.exp, tag: cur.id, kind: "quiz", dueNow: conf === "strong" });
+        }
       });
-      $("qzExp").innerHTML = qz.exp;
-      $("qzExp").style.display = "block";
-      $("btnQuizDone").style.display = "block";
-      /* B2分散学習：クリア済みミニクイズは復習キュー登録対象（間違えた時は即登録、正解時も新規なら緩く登録） */
-      if (!correct) {
-        rqUpsert("quiz-" + cur.id, { type: "quiz", lessonId: cur.id });
-      }
     });
     wrap.appendChild(b);
   });
@@ -2629,12 +3498,24 @@ $("btnQuizDone").addEventListener("click", () => {
   progress.done[cur.id] = true;
   bumpStreak();
   saveProgress();
+  touchFresh(cur.id);
+  addXP(20);
   $("clearStamp").innerHTML = cur.tag + " CLEAR!<small>今朝の15分 完了</small>";
   $("teaserBox").innerHTML = "🔮 <b>これが分かると…</b><br>" + (cur.teaser || "");
   const s = progress.streak;
   $("clearMsg").innerHTML = "🔥 " + s.n + "週れんぞく<br>" + (curIdx < LESSONS.length - 1 ? "次回：" + LESSONS[curIdx + 1].tag + " " + LESSONS[curIdx + 1].title : "次回：章ボス戦！");
+  $("teachTxtLesson").value = "";
+  $("teachSavedLesson").style.display = "none";
   setPhase("phClear");
+  openGacha(rollGacha(false), { xpLine: "レッスンクリア +20XP" });
 });
+$("btnTeachSendLesson").addEventListener("click", () => {
+  if (addTeachNote(cur ? cur.id : "", $("teachTxtLesson").value)) {
+    $("teachSavedLesson").style.display = "block";
+    $("teachTxtLesson").value = "";
+  }
+});
+$("btnTeachSkipLesson").addEventListener("click", () => { $("teachTxtLesson").value = ""; });
 
 $("btnGoHome").addEventListener("click", () => { renderHome(); showView("viewHome"); });
 $("btnBack").addEventListener("click", () => { if (ST && ST.stopBlueprint) ST.stopBlueprint(); renderHome(); showView("viewHome"); });
@@ -2666,38 +3547,55 @@ function renderBossQ() {
     b.addEventListener("click", () => {
       if (answered) return;
       answered = true;
+      wrap.querySelectorAll(".opt").forEach((x) => (x.disabled = true));
       const correct = idx === q.ans;
-      if (correct) bScore++;
-      else rqUpsert("boss-" + bIdx, { type: "boss", idx: bIdx });
-      wrap.querySelectorAll(".opt").forEach((x, xi) => {
-        if (xi === q.ans) x.classList.add("correct");
-        else if (xi === idx) x.classList.add("wrong");
-        else x.classList.add("dim");
+      askConfidence(wrap, (conf) => {
+        addXP(applyConfidenceXP(correct, conf));
+        if (correct) { bScore++; vib([16, 30, 10]); }
+        else rqUpsert("boss-" + bIdx, { q: q.q, opts: q.opts, ans: q.ans, exp: q.exp, tag: "boss", kind: "boss", dueNow: conf === "strong" });
+        wrap.querySelectorAll(".opt").forEach((x, xi) => {
+          if (xi === q.ans) x.classList.add("correct");
+          else if (xi === idx) x.classList.add("wrong");
+          else x.classList.add("dim");
+        });
+        $("bsExp").innerHTML = q.exp + confBadgeHTML(conf, correct);
+        $("bsExp").style.display = "block";
+        $("btnBossNext").style.display = "block";
+        $("btnBossNext").textContent = bIdx < BOSS.length - 1 ? "つぎ →" : "結果を見る →";
       });
-      $("bsExp").innerHTML = q.exp;
-      $("bsExp").style.display = "block";
-      $("btnBossNext").style.display = "block";
-      $("btnBossNext").textContent = bIdx < BOSS.length - 1 ? "つぎ →" : "結果を見る →";
     });
     wrap.appendChild(b);
   });
 }
 $("btnBossNext").addEventListener("click", () => {
-  if (bIdx < BOSS.length - 1) { bIdx++; renderBossQ(); }
-  else {
-    $("bossPlay").style.display = "none";
-    $("bossResult").style.display = "block";
-    $("bsScore").textContent = bScore + " / 7";
-    if (bScore >= 5) {
-      progress.done["l7"] = true;
-      bumpStreak();
-      saveProgress();
-      $("bsMsg").innerHTML = "🏆 第1章 制覇！<br>⚔ 判断ドリルが解放された！<br>第2章「機械要素図鑑」は次のアップデートで配信。";
-    } else {
-      $("bsMsg").innerHTML = "あと少し！ 5問正解でクリア。<br>まちがえたレッスンを触り直してから再挑戦。";
-    }
+  if (bIdx < BOSS.length - 1) { bIdx++; renderBossQ(); return; }
+  $("bossPlay").style.display = "none";
+  $("bossResult").style.display = "block";
+  $("bsScore").textContent = bScore + " / 7";
+  if (bScore >= 5) {
+    const firstClear = !progress.done["l7"];
+    progress.done["l7"] = true;
+    bumpStreak();
+    saveProgress();
+    addXP(40);
+    $("bsMsg").innerHTML = "🏆 第1章 制覇！<br>⚔ 判断ドリルが解放された！<br>第2章「機械要素図鑑」は次のアップデートで配信。";
+    $("teachBoxBoss").style.display = "block";
+    $("teachTxtBoss").value = "";
+    $("teachSavedBoss").style.display = "none";
+    if (firstClear) grantTitle(GEAR_BASIC_TITLE.id, GEAR_BASIC_TITLE.name); /* 初回保証（§3.5） */
+    openGacha(rollGacha(true), { xpLine: "ボス合格 +40XP" });
+  } else {
+    $("teachBoxBoss").style.display = "none";
+    $("bsMsg").innerHTML = "あと少し！ 5問正解でクリア。<br>まちがえたレッスンを触り直してから再挑戦。";
   }
 });
+$("btnTeachSendBoss").addEventListener("click", () => {
+  if (addTeachNote("boss", $("teachTxtBoss").value)) {
+    $("teachSavedBoss").style.display = "block";
+    $("teachTxtBoss").value = "";
+  }
+});
+$("btnTeachSkipBoss").addEventListener("click", () => { $("teachTxtBoss").value = ""; });
 $("btnBossHome").addEventListener("click", () => { renderHome(); showView("viewHome"); });
 $("btnBackB").addEventListener("click", () => { renderHome(); showView("viewHome"); });
 
@@ -2729,31 +3627,36 @@ function renderDrillQ() {
     answered = true;
     okBtn.disabled = true; ngBtn.disabled = true;
     const correct = choice === d.ans;
-    drillStats.seen[d.id] = true;
-    drillStats.totalCount = (drillStats.totalCount || 0) + 1;
-    if (correct) {
-      drillStats.correctCount = (drillStats.correctCount || 0) + 1;
-      drillStats.wrong[d.id] = 0;
-      dScore++;
-    } else {
-      drillStats.wrong[d.id] = (drillStats.wrong[d.id] || 0) + 1;
-      /* B8熟達研究：間違えたドリルは復習キューへ */
-      rqUpsert("drill-" + d.id, { type: "drill", drillId: d.id });
-    }
-    saveDrillStats();
-    dResults.push(correct);
-    const pickBtn = choice === "OK" ? okBtn : ngBtn;
-    const otherBtn = choice === "OK" ? ngBtn : okBtn;
-    pickBtn.classList.add(correct ? "correct" : "wrong");
-    if (d.ans !== choice) {
-      (d.ans === "OK" ? okBtn : ngBtn).classList.add("correct");
-    }
-    otherBtn.classList.add("dim");
-    $("dqExp").innerHTML = "<b>正解：" + d.ans + "</b><br>" + d.reason + "<br>" + d.fix;
-    $("dqExp").style.display = "block";
-    $("btnDrillNext").style.display = "block";
-    $("btnDrillNext").textContent = dIdx < dSet.length - 1 ? "つぎ →" : "結果を見る →";
-    vib(correct ? [20, 20, 40] : 30);
+    askConfidence($("dqOpts"), (conf) => {
+      addXP(applyConfidenceXP(correct, conf));
+      drillStats.seen[d.id] = true;
+      drillStats.totalCount = (drillStats.totalCount || 0) + 1;
+      if (correct) {
+        drillStats.correctCount = (drillStats.correctCount || 0) + 1;
+        drillStats.wrong[d.id] = 0;
+        dScore++;
+        const lid = lessonIdForDrillTag(d.tag);
+        if (lid) touchFresh(lid);
+      } else {
+        drillStats.wrong[d.id] = (drillStats.wrong[d.id] || 0) + 1;
+        /* B8熟達研究：間違えたドリルは復習キューへ（v2ペイロード） */
+        rqUpsert("drill-" + d.id, { q: d.situation, opts: ["OK", "NG"], ans: d.ans === "OK" ? 0 : 1, exp: d.reason + " " + d.fix, tag: lessonIdForDrillTag(d.tag) || d.tag, kind: "drill", dueNow: conf === "strong" });
+      }
+      saveDrillStats();
+      dResults.push(correct);
+      const pickBtn = choice === "OK" ? okBtn : ngBtn;
+      const otherBtn = choice === "OK" ? ngBtn : okBtn;
+      pickBtn.classList.add(correct ? "correct" : "wrong");
+      if (d.ans !== choice) {
+        (d.ans === "OK" ? okBtn : ngBtn).classList.add("correct");
+      }
+      otherBtn.classList.add("dim");
+      $("dqExp").innerHTML = "<b>正解：" + d.ans + "</b><br>" + d.reason + "<br>" + d.fix + confBadgeHTML(conf, correct);
+      $("dqExp").style.display = "block";
+      $("btnDrillNext").style.display = "block";
+      $("btnDrillNext").textContent = dIdx < dSet.length - 1 ? "つぎ →" : "結果を見る →";
+      vib(correct ? [20, 20, 40] : 30);
+    });
   }
   okBtn.onclick = () => pick("OK");
   ngBtn.onclick = () => pick("NG");
@@ -2787,18 +3690,67 @@ $("btnBackD").addEventListener("click", () => { renderHome(); showView("viewHome
    ⚡ 復習キュー（間隔反復・上限5問）
 ================================================================ */
 let rqSet = [], rqIdx = 0, rqScore = 0;
+let reviewMode = "review"; /* 'review' | 'daily' | 'repaint' */
+let repaintLessonId = null;
+
 function openReview() {
   rqSet = rqDueList().map((item) => ({ item, q: rqResolveQuestion(item) })).filter((x) => x.q);
   if (!rqSet.length) { renderHome(); showView("viewHome"); return; }
+  reviewMode = "review";
   rqIdx = 0; rqScore = 0;
   showView("viewReview");
   $("reviewPlay").style.display = "block";
   $("reviewResult").style.display = "none";
   renderRQQ();
 }
+
+/* v2: 🔀 FORGE DAILY（家族ミックス最大5問） */
+function openDaily() {
+  if (dailyDoneToday()) { renderHome(); showView("viewHome"); return; }
+  const picked = pickDailySet();
+  if (picked.length < 2) { renderHome(); showView("viewHome"); return; }
+  rqSet = picked.map((p) => ({ app: p.app, item: p.item, q: { q: p.item.q, opts: p.item.opts, ans: p.item.ans, exp: p.item.exp, drill: p.item.kind === "drill" } }));
+  reviewMode = "daily";
+  rqIdx = 0; rqScore = 0;
+  showView("viewReview");
+  $("reviewPlay").style.display = "block";
+  $("reviewResult").style.display = "none";
+  renderRQQ();
+}
+$("btnDaily") && $("btnDaily").addEventListener("click", openDaily);
+
+/* v2: 🦠 再塗装フロー（そのレッスンのミッション問＋クイズの計2問） */
+function openRepaint(lessonId) {
+  const L = LESSONS.find((x) => x.id === lessonId);
+  if (!L) return;
+  repaintLessonId = lessonId;
+  rqSet = [
+    { q: { q: String(L.mission.q).replace(/<br>/g, " "), opts: L.mission.opts, ans: L.mission.ans, exp: L.mission.ansLine } },
+    { q: { q: L.quiz.q, opts: L.quiz.opts, ans: L.quiz.ans, exp: L.quiz.exp } }
+  ];
+  reviewMode = "repaint";
+  rqIdx = 0; rqScore = 0;
+  showView("viewReview");
+  $("reviewPlay").style.display = "block";
+  $("reviewResult").style.display = "none";
+  renderRQQ();
+}
+function triggerRepaintAnim(lessonId) {
+  const idx = LESSONS.findIndex((L) => L.id === lessonId);
+  if (idx < 0) return;
+  const nodes = document.querySelectorAll("#nodes1 .node");
+  const el = nodes[idx];
+  if (!el) return;
+  el.classList.add("repainting");
+  setTimeout(() => el.classList.remove("repainting"), 900);
+}
+
 function renderRQQ() {
-  const { item, q } = rqSet[rqIdx];
-  $("rqProgress").textContent = "第" + (rqIdx + 1) + "問 ／ " + rqSet.length + "問中（忘れかけた頃の再登場）";
+  const cur2 = rqSet[rqIdx];
+  const q = cur2.q;
+  const headLabel = reviewMode === "daily" ? "FORGE DAILY" : reviewMode === "repaint" ? "🦠 再塗装" : "忘れかけた頃の再登場";
+  const badge = reviewMode === "daily" ? '<span class="dailybadge">' + (APP_META[cur2.app] || { emoji: "❔", name: cur2.app }).emoji + " " + (APP_META[cur2.app] || { name: cur2.app }).name + "</span>" : "";
+  $("rqProgress").innerHTML = "第" + (rqIdx + 1) + "問 ／ " + rqSet.length + "問中（" + headLabel + "）" + (badge ? "<br>" + badge : "");
   $("rqText").textContent = q.q;
   $("rqExp").style.display = "none";
   $("btnRQNext").style.display = "none";
@@ -2812,28 +3764,60 @@ function renderRQQ() {
     b.addEventListener("click", () => {
       if (answered) return;
       answered = true;
+      wrap.querySelectorAll(".opt").forEach((x) => (x.disabled = true));
       const correct = idx === q.ans;
-      if (correct) rqScore++;
-      rqAnswer(item, correct);
-      wrap.querySelectorAll(".opt").forEach((x, xi) => {
-        if (xi === q.ans) x.classList.add("correct");
-        else if (xi === idx) x.classList.add("wrong");
-        else x.classList.add("dim");
+      askConfidence(wrap, (conf) => {
+        addXP(applyConfidenceXP(correct, conf));
+        if (correct) rqScore++;
+        wrap.querySelectorAll(".opt").forEach((x, xi) => {
+          if (xi === q.ans) x.classList.add("correct");
+          else if (xi === idx) x.classList.add("wrong");
+          else x.classList.add("dim");
+        });
+        let teachApp = "gear", teachLesson = "";
+        if (reviewMode === "daily") { teachApp = cur2.app; teachLesson = (cur2.item && cur2.item.tag) || ""; }
+        else if (reviewMode === "review") { teachLesson = (cur2.item && cur2.item.tag) || ""; }
+        $("rqExp").innerHTML = q.exp + confBadgeHTML(conf, correct) + teachEchoHTML(teachApp, teachLesson);
+        $("rqExp").style.display = "block";
+        $("btnRQNext").style.display = "block";
+        $("btnRQNext").textContent = rqIdx < rqSet.length - 1 ? "つぎ →" : "結果を見る →";
+        if (reviewMode === "review") {
+          const forceNow = conf === "strong" && !correct;
+          rqAnswer(cur2.item, correct);
+          if (forceNow) { cur2.item.due = Date.now(); saveRQ(); }
+          if (correct && cur2.item.tag) touchFresh(cur2.item.tag);
+        } else if (reviewMode === "daily") {
+          writeBackDaily(cur2.app, cur2.item.id, correct, conf === "strong" && !correct);
+          if (correct && cur2.app === "gear" && cur2.item.tag) touchFresh(cur2.item.tag);
+        }
+        /* repaintモードはfreshを個別更新せず、全問終了時に一括更新する（§3.1） */
       });
-      $("rqExp").innerHTML = q.exp;
-      $("rqExp").style.display = "block";
-      $("btnRQNext").style.display = "block";
-      $("btnRQNext").textContent = rqIdx < rqSet.length - 1 ? "つぎ →" : "結果を見る →";
     });
     wrap.appendChild(b);
   });
 }
 $("btnRQNext").addEventListener("click", () => {
-  if (rqIdx < rqSet.length - 1) { rqIdx++; renderRQQ(); }
-  else {
-    $("reviewPlay").style.display = "none";
-    $("reviewResult").style.display = "block";
-    $("rqResultScore").textContent = rqScore + " / " + rqSet.length;
+  if (rqIdx < rqSet.length - 1) { rqIdx++; renderRQQ(); return; }
+  $("reviewPlay").style.display = "none";
+  $("reviewResult").style.display = "block";
+  $("rqResultScore").textContent = rqScore + " / " + rqSet.length;
+  if (reviewMode === "repaint") {
+    touchFresh(repaintLessonId);
+    addXP(10);
+    repaintCounter.n = (repaintCounter.n || 0) + 1;
+    saveRepaintCounter();
+    $("rqClearMsg").innerHTML = "🎨 再塗装完了！サビが落ちて光沢が戻った";
+    renderHome();
+    triggerRepaintAnim(repaintLessonId);
+    if (repaintCounter.n % 3 === 0) openGacha(rollGacha(false), { xpLine: "再塗装3件目ボーナス" });
+  } else if (reviewMode === "daily") {
+    const d = readJSON(DAILY_KEY, { doneCount: 0 });
+    writeJSON(DAILY_KEY, { date: todayStr(), doneCount: (d.doneCount || 0) + 1 });
+    addXP(15);
+    $("rqClearMsg").innerHTML = "🔀 FORGE DAILY 完走！家族の知識をミックスした";
+    openGacha(rollGacha(false), { xpLine: "DAILY完走 +15XP" });
+  } else {
+    $("rqClearMsg").innerHTML = "🔥 忘れかけた記憶をしっかり固定した";
     bumpStreak();
     saveProgress();
   }

@@ -1,5 +1,5 @@
-/* GEAR FORGE service worker v1 */
-const CACHE = "gear-forge-v1";
+/* GEAR FORGE service worker v2 */
+const CACHE = "gear-forge-cache-v2";
 const SHELL = ["./", "./index.html", "./manifest.json", "./icon.svg"];
 
 self.addEventListener("install", (e) => {
